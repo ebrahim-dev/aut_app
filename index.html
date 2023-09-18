@@ -17,10 +17,11 @@
     <h1>Inloggen</h1>
     <input id="loginEmail" type="text" placeholder="E-mailadres" /><br />
     <input
-      id="loginGeneratedNumber"
+      id="loginGeneratedCode"
       type="text"
-      placeholder="Generated Number"
+      placeholder="Gegenereerde Code"
     /><br />
+
     <button onclick="login()">Login</button>
 
     <script>
@@ -69,24 +70,20 @@
 
       async function login() {
         const email = document.getElementById("loginEmail").value;
-        const generatedNumber = document.getElementById(
-          "loginGeneratedNumber"
-        ).value;
+        const generatedCode =
+          document.getElementById("loginGeneratedCode").value;
 
-        if (email && generatedNumber) {
-          const response = await fetch(
-            "http://localhost:4000/loginWithGeneratedNumber",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email,
-                generatedNumber,
-              }),
-            }
-          );
+        if (email && generatedCode) {
+          const response = await fetch("http://localhost:4000/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email,
+              generatedCode,
+            }),
+          });
 
           const data = await response.json();
           if (data.success) {

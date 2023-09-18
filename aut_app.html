@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -24,17 +24,13 @@
       </svg>
       <h2>Timer: <span id="timer"></span></h2>
     </div>
-
-    <h2>Koppel E-mail aan Code</h2>
-    <input id="emailInput" type="text" placeholder="Voer uw e-mailadres in" />
-    <button onclick="linkEmail()">Koppel E-mail</button>
-
+    <h1>Gegenereerde nummer:</h1>
+    <ul id="userList"></ul>
     <script>
       const randomNumberElement = document.getElementById("randomNumber");
       const timerElement = document.getElementById("timer");
-      let userEmail = document.getElementById("emailInput").value; // Dit is de gebruiker waarvoor je het nummer genereert
+      let userEmail = "111"; // Dit is de gebruiker waarvoor je het nummer genereert
 
-      // Functie om een nieuw willekeurig nummer te genereren en naar de server te sturen
       const generateNumber = () => {
         const randomNumber = Math.floor(100000 + Math.random() * 900000);
         randomNumberElement.textContent = randomNumber;
@@ -73,9 +69,14 @@
         generateNumber();
 
         const timerInterval = setInterval(() => {
-          generateNumber();
-        }, 30000); // Generate a new number every 30 seconds
+          const newNumbers = {};
 
+          for (const email in userData) {
+            newNumbers[email] = Math.floor(100000 + Math.random() * 900000);
+          }
+
+          updateAllNumbers(newNumbers);
+        }, 30000); // Generate new numbers every 30 seconds
         let timerValue = 30; // Initial timer value
 
         const countdownInterval = setInterval(() => {
@@ -88,17 +89,60 @@
         }, 1000);
       };
 
-      startTimer();
+      const userListElement = document.getElementById("userList");
+      let userData = {}; // Voeg deze regel toe om userData te initialiseren
 
-      function linkEmail() {
-        const emailInput = document.getElementById("emailInput");
-        const newEmail = emailInput.value;
+      async function getUserData() {
+        try {
+          const response = await fetch("http://localhost:4000/users");
+          userData = await response.json(); // Bewaar de gebruikersgegevens in userData
 
-        if (newEmail) {
-          userEmail = newEmail; // Stel het nieuwe e-mailadres in
-          console.log(`E-mailadres gewijzigd naar: ${userEmail}`);
+          for (const email in userData) {
+            const user = userData[email];
+            const generatedNumber = user.generatedNumber;
+
+            const listItem = document.createElement("li");
+            listItem.textContent = `E-mail: ${email}, Gegenereerde Code: ${generatedNumber}`;
+
+            userListElement.appendChild(listItem);
+          }
+        } catch (error) {
+          console.error("Fout bij het ophalen van gebruikersgegevens:", error);
         }
       }
+
+      const updateAllNumbers = async (newNumbers) => {
+        try {
+          const response = await fetch(
+            "http://localhost:4000/updateAllNumbers",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ numbers: newNumbers }),
+            }
+          );
+
+          const data = await response.json();
+          if (data.success) {
+            console.log("Alle nummers zijn succesvol bijgewerkt.");
+          } else {
+            console.error(
+              "Fout bij het bijwerken van de nummers:",
+              data.message
+            );
+          }
+        } catch (error) {
+          console.error(
+            "Fout bij het verzenden van gegevens naar de server:",
+            error
+          );
+        }
+      };
+
+      getUserData(); // Roep getUserData op om de gebruikersgegevens te verkrijgen en userData te vullen
+      startTimer();
     </script>
 
     <style>
@@ -123,4 +167,4 @@
       }
     </style>
   </body>
-</html>
+</html> -->
