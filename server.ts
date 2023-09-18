@@ -80,6 +80,38 @@ app.post("/updateNumber", (req, res) => {
     res.status(500).json({ success: false, message: "Interne serverfout" });
   }
 });
+app.post("/linkEmailToCode", (req: Request, res: Response) => {
+  const { email, generatedNumber } = req.body;
+
+  if (users[email]) {
+    users[email].generatedNumber = generatedNumber;
+    saveUsers(users);
+    res.json({ success: true });
+  } else {
+    res.json({ success: false, message: "Gebruiker niet gevonden" });
+  }
+});
+app.post("/loginWithGeneratedNumber", (req: Request, res: Response) => {
+  const { email, generatedNumber } = req.body;
+
+  if (users[email] && users[email].generatedNumber == generatedNumber) {
+    res.json({ success: true });
+  } else {
+    res.json({ success: false, message: "Ongeldige inloggegevens" });
+  }
+});
+let userEmail: string | null = null;
+
+app.post("/linkEmail", (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  if (users[email]) {
+    userEmail = email; // Bewaar het e-mailadres in een variabele die behouden blijft
+    res.json({ success: true });
+  } else {
+    res.json({ success: false, message: "Gebruiker niet gevonden" });
+  }
+});
 
 app.listen(4000, () => {
   console.log("Server is gestart op http://localhost:4000");

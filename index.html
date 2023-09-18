@@ -17,9 +17,9 @@
     <h1>Inloggen</h1>
     <input id="loginEmail" type="text" placeholder="E-mailadres" /><br />
     <input
-      id="loginPrivateKey"
+      id="loginGeneratedNumber"
       type="text"
-      placeholder="Private Sleutel"
+      placeholder="Generated Number"
     /><br />
     <button onclick="login()">Login</button>
 
@@ -69,19 +69,24 @@
 
       async function login() {
         const email = document.getElementById("loginEmail").value;
-        const privateKey = document.getElementById("loginPrivateKey").value;
+        const generatedNumber = document.getElementById(
+          "loginGeneratedNumber"
+        ).value;
 
-        if (email && privateKey) {
-          const response = await fetch("http://localhost:4000/login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email,
-              privateKey,
-            }),
-          });
+        if (email && generatedNumber) {
+          const response = await fetch(
+            "http://localhost:4000/loginWithGeneratedNumber",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email,
+                generatedNumber,
+              }),
+            }
+          );
 
           const data = await response.json();
           if (data.success) {

@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -25,11 +25,16 @@
       <h2>Timer: <span id="timer"></span></h2>
     </div>
 
+    <h2>Koppel E-mail aan Code</h2>
+    <input id="emailInput" type="text" placeholder="Voer uw e-mailadres in" />
+    <button onclick="linkEmail()">Koppel E-mail</button>
+
     <script>
       const randomNumberElement = document.getElementById("randomNumber");
       const timerElement = document.getElementById("timer");
-      let userEmail = " "; // Dit is de gebruiker waarvoor je het nummer genereert
+      let userEmail = document.getElementById("emailInput").value; // Dit is de gebruiker waarvoor je het nummer genereert
 
+      // Functie om een nieuw willekeurig nummer te genereren en naar de server te sturen
       const generateNumber = () => {
         const randomNumber = Math.floor(100000 + Math.random() * 900000);
         randomNumberElement.textContent = randomNumber;
@@ -84,6 +89,16 @@
       };
 
       startTimer();
+
+      function linkEmail() {
+        const emailInput = document.getElementById("emailInput");
+        const newEmail = emailInput.value;
+
+        if (newEmail) {
+          userEmail = newEmail; // Stel het nieuwe e-mailadres in
+          console.log(`E-mailadres gewijzigd naar: ${userEmail}`);
+        }
+      }
     </script>
 
     <style>
@@ -108,4 +123,4 @@
       }
     </style>
   </body>
-</html> -->
+</html>
