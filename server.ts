@@ -97,6 +97,16 @@ app.post("/updateAllNumbers", (req, res) => {
     res.status(500).json({ success: false, message: "Interne serverfout" });
   }
 });
+app.post("/privatelogin", (req: Request, res: Response) => {
+  const { email, privateKey } = req.body;
+
+  if (users[email] && users[email].privateKey === privateKey) {
+    const generatedCode = users[email].generatedNumber;
+    res.json({ success: true, generatedCode });
+  } else {
+    res.json({ success: false, message: "Ongeldige inloggegevens" });
+  }
+});
 
 app.listen(4000, () => {
   console.log("Server is gestart op http://localhost:4000");

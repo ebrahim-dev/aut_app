@@ -78,13 +78,15 @@
           updateAllNumbers(newNumbers);
         }, 30000); // Generate new numbers every 30 seconds
         let timerValue = 30; // Initial timer value
+        const liveTimerElement = document.getElementById("liveTimerValue");
 
         const countdownInterval = setInterval(() => {
           if (timerValue > 0) {
             timerValue -= 1;
             timerElement.textContent = timerValue;
+            localStorage.setItem("liveTimerValue", timerValue); // Opslaan in localStorage
           } else {
-            timerValue = 30; // Reset timer to 30 seconds
+            timerValue = 30; // Reset timer naar 30 seconden
           }
         }, 1000);
       };
@@ -141,8 +143,9 @@
         }
       };
 
-      getUserData(); // Roep getUserData op om de gebruikersgegevens te verkrijgen en userData te vullen
       startTimer();
+      setTimeout(function () {}, 300);
+      getUserData(); // Roep getUserData op om de gebruikersgegevens te verkrijgen en userData te vullen
     </script>
 
     <style>

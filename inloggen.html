@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inloggen</title>
+  </head>
+
+  <body>
+    <h1>Inloggen</h1>
+    <input id="loginEmail" type="text" placeholder="E-mailadres" /><br />
+    <input
+      id="loginPrivateKey"
+      type="text"
+      placeholder="Private Sleutel"
+    /><br />
+    <button onclick="login()">Login</button>
+    <!-- Voeg dit element toe aan je HTML -->
+    <div id="generatedCodeContainer">
+      Gegenereerde Code: <span id="generatedCode"></span>
+    </div>
+    <div><span id="liveTimerValue"></span></div>
+
+    <script>
+      async function login() {
+        const email = document.getElementById("loginEmail").value;
+        const privateKey = document.getElementById("loginPrivateKey").value;
+
+        if (email && privateKey) {
+          const response = await fetch("http://localhost:4000/privatelogin", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email,
+              privateKey,
+            }),
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            const generatedCode = data.generatedCode;
+            const generatedCodeElement =
+              document.getElementById("generatedCode");
+            generatedCodeElement.textContent = generatedCode;
+          } else {
+            alert(data.message);
+          }
+        }
+      }
+      document.addEventListener("DOMContentLoaded", function () {
+        const liveTimerElement = document.getElementById("liveTimerValue");
+
+        function updateLiveTimerValue() {
+          const storedValue = localStorage.getItem("liveTimerValue");
+          if (storedValue !== null) {
+            liveTimerElement.textContent = storedValue;
+          }
+        }
+
+        // Roep de functie aan om de waarde bij het laden van de pagina op te halen
+        updateLiveTimerValue();
+
+        // Optioneel: Update de waarde op de inlogpagina wanneer deze verandert in de auth-app pagina
+        window.addEventListener("storage", function (e) {
+          if (e.key === "liveTimerValue") {
+            liveTimerElement.textContent = e.newValue;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
