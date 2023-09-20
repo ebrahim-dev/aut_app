@@ -107,6 +107,17 @@ app.post("/privatelogin", (req: Request, res: Response) => {
     res.json({ success: false, message: "Ongeldige inloggegevens" });
   }
 });
+app.get("/getGeneratedCode", (req, res) => {
+  const email = req.query.email as string; // Gebruik 'as string' om de query parameter als een string te interpreteren
+
+  if (typeof email === "string" && users[email]) {
+    // Controleer of email een string is
+    const generatedCode = users[email].generatedNumber;
+    res.json({ success: true, generatedCode });
+  } else {
+    res.json({ success: false, message: "Gebruiker niet gevonden" });
+  }
+});
 
 app.listen(4000, () => {
   console.log("Server is gestart op http://localhost:4000");
