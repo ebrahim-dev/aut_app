@@ -78,16 +78,6 @@ app.post("/register", (req: Request, res: Response) => {
   }
 });
 
-app.post("/login", (req: Request, res: Response) => {
-  const { email, generatedCode } = req.body;
-
-  if (users[email] && users[email].generatedNumber == generatedCode) {
-    res.json({ success: true });
-  } else {
-    res.json({ success: false, message: "Ongeldige inloggegevens" });
-  }
-});
-
 app.get("/users", (req: Request, res: Response) => {
   res.json(users);
 });
@@ -96,49 +86,6 @@ function privateKeyIsValid(privateKey: string): boolean {
   return privateKey.length >= 8;
 }
 
-app.post("/updateNumber", (req, res) => {
-  try {
-    const { email, number } = req.body;
-
-    if (users[email]) {
-      users[email].generatedNumber = number;
-      saveUsers(users);
-      res.json({ success: true });
-    } else {
-      res.json({ success: false, message: "Gebruiker niet gevonden" });
-    }
-  } catch (error) {
-    console.error("Fout bij het verwerken van het verzoek:", error);
-    res.status(500).json({ success: false, message: "Interne serverfout" });
-  }
-});
-app.post("/updateAllNumbers", (req, res) => {
-  try {
-    const { numbers } = req.body;
-
-    for (const email in numbers) {
-      if (users[email]) {
-        users[email].generatedNumber = numbers[email];
-      }
-    }
-
-    saveUsers(users);
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Fout bij het verwerken van het verzoek:", error);
-    res.status(500).json({ success: false, message: "Interne serverfout" });
-  }
-});
-app.post("/privatelogin", (req: Request, res: Response) => {
-  const { email, privateKey } = req.body;
-
-  if (users[email] && users[email].privateKey === privateKey) {
-    const generatedCode = users[email].generatedNumber;
-    res.json({ success: true, generatedCode });
-  } else {
-    res.json({ success: false, message: "Ongeldige inloggegevens" });
-  }
-});
 app.post("/passwordless", (req: Request, res: Response) => {
   const { email } = req.body;
   if (users[email]) {
@@ -295,18 +242,6 @@ app.get("/public/getLoginStatus", (req, res) => {
   } catch (error) {
     console.error("Fout bij het ophalen van de loginstatus:", error);
     res.status(500).json({ success: false, message: "Interne serverfout" });
-  }
-});
-
-app.get("/getGeneratedCode", (req, res) => {
-  const email = req.query.email as string; // Gebruik 'as string' om de query parameter als een string te interpreteren
-
-  if (typeof email === "string" && users[email]) {
-    // Controleer of email een string is
-    const generatedCode = users[email].generatedNumber;
-    res.json({ success: true, generatedCode });
-  } else {
-    res.json({ success: false, message: "Gebruiker niet gevonden" });
   }
 });
 
