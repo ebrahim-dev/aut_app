@@ -15,14 +15,6 @@ interface User {
   newerValue?: string; // Voeg de newerValue eigenschap toe
 }
 
-// function loadUsers(): { [key: string]: User } {
-//   try {
-//     const data = fs.readFileSync("database.json", "utf-8");
-//     return JSON.parse(data).users || {};
-//   } catch (error) {
-//     return {};
-//   }
-// }
 function loadUsers(): { [key: string]: User } {
   try {
     const data = fs.readFileSync("database.json", "utf-8");
@@ -155,44 +147,7 @@ app.post("/passwordless", (req: Request, res: Response) => {
     res.json({ success: false });
   }
 });
-// app.post("/addNewValue", (req, res) => {
-//   try {
-//     const { email, privateKey } = req.body;
 
-//     // Voer hier de benodigde validaties uit
-//     if (!email || !privateKey) {
-//       res.json({
-//         success: false,
-//         message: "E-mail en privésleutel zijn vereist",
-//       });
-//       return;
-//     }
-
-//     if (users[email]) {
-//       res.json({ success: false, message: "Deze e-mail is al geregistreerd" });
-//       return;
-//     }
-
-//     if (!privateKeyIsValid(privateKey)) {
-//       res.json({ success: false, message: "Ongeldige privésleutel" });
-//       return;
-//     }
-
-//     // Genereer de nieuwe waarde
-//     const publicKey = users[email].publicKey; // Haal de bijbehorende public key op
-//     const newValue = generateNewValue(publicKey, privateKey);
-
-//     // Voeg de waarden toe aan je database
-//     const generatedNumber = Math.floor(Math.random() * 1000000); // Genereer een willekeurig nummer (voorbeeld)
-//     users[email] = { publicKey, privateKey, generatedNumber, newValue };
-//     saveUsers(users);
-
-//     res.json({ success: true });
-//   } catch (error) {
-//     console.error("Fout bij het verwerken van het verzoek:", error);
-//     res.status(500).json({ success: false, message: "Interne serverfout" });
-//   }
-// });
 app.post("/addNewValue", (req, res) => {
   try {
     const { email, privateKey } = req.body;
@@ -258,10 +213,8 @@ app.post("/compaireNewValue", (req, res) => {
 
     // Haal de public key op uit de gebruikersgegevens
     const publicKey = users[email].publicKey;
-
     // Haal de bestaande 'newValue' op uit de database
     const existingValue = users[email].newValue;
-
     // Genereer de nieuwe waarde
     const newerValue = generateNewerValue(publicKey, privateKey);
 

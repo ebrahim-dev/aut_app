@@ -14,16 +14,6 @@
     <p id="generatedPublicKey"></p>
     <button onclick="generateNewKey()">Genereer Nieuwe Public Sleutel</button>
 
-    <h1>Inloggen</h1>
-    <input id="loginEmail" type="text" placeholder="E-mailadres" /><br />
-    <input
-      id="loginGeneratedCode"
-      type="text"
-      placeholder="Gegenereerde Code"
-    /><br />
-
-    <button onclick="login()">Login</button>
-
     <script>
       let currentPublicKey = null;
 
@@ -66,32 +56,6 @@
         document.getElementById(
           "generatedPublicKey"
         ).innerText = `Public Sleutel: ${currentPublicKey}`;
-      }
-
-      async function login() {
-        const email = document.getElementById("loginEmail").value;
-        const generatedCode =
-          document.getElementById("loginGeneratedCode").value;
-
-        if (email && generatedCode) {
-          const response = await fetch("http://localhost:4000/login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email,
-              generatedCode,
-            }),
-          });
-
-          const data = await response.json();
-          if (data.success) {
-            alert(`Ingelogd. Welkom, ${email}!`);
-          } else {
-            alert(data.message);
-          }
-        }
       }
 
       function generateRandomKey() {

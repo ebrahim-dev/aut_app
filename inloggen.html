@@ -9,11 +9,6 @@
   <body>
     <h1>Inloggen</h1>
     <input id="loginEmail" type="text" placeholder="E-mailadres" /><br />
-    <!-- <input
-      id="loginPrivateKey"
-      type="text"
-      placeholder="Private Sleutel"
-    /><br /> -->
     <input
       id="loginPrivateKey"
       type="text"
@@ -28,33 +23,6 @@
     <div><span id="liveTimerValue"></span></div>
 
     <script>
-      //   async function login() {
-      //     const email = document.getElementById("loginEmail").value;
-      //     const privateKey = document.getElementById("loginPrivateKey").value;
-
-      //     if (email && privateKey) {
-      //       const response = await fetch("http://localhost:4000/privatelogin", {
-      //         method: "POST",
-      //         headers: {
-      //           "Content-Type": "application/json",
-      //         },
-      //         body: JSON.stringify({
-      //           email,
-      //           privateKey,
-      //         }),
-      //       });
-
-      //       const data = await response.json();
-      //       if (data.success) {
-      //         const generatedCode = data.generatedCode;
-      //         const generatedCodeElement =
-      //           document.getElementById("generatedCode");
-      //         generatedCodeElement.textContent = generatedCode;
-      //       } else {
-      //         alert(data.message);
-      //       }
-      //     }
-      //   }
       async function login() {
         const email = document.getElementById("loginEmail").value;
         const privateKey = document.getElementById("loginPrivateKey").value;

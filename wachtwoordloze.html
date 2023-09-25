@@ -9,12 +9,6 @@
     <h1>Wachtwoordloze inloggingmethode</h1>
     <input id="loginEmail" type="text" placeholder="E-mailadres" /><br />
     <button onclick="login()">Login</button>
-    <!-- <form id="registering" style="display: none">
-      Please register in our new login system passwordless.
-    </form> -->
-    <!-- <form id="logging" style="display: none">
-      Please loging using your private key.
-    </form> -->
 
     <script>
       async function login() {
@@ -33,12 +27,10 @@
           const data = await response.json();
           if (data.success) {
             localStorage.setItem("userEmail", userEmail);
-            let inlogged = false;
-            if (inlogged == false) {
-              alert("Please use your private key then cklick on ok!");
-            }
             await checkLoginStatus(userEmail);
-
+            if (inlogged == false) {
+              alert("Please use your private key then try it again");
+            }
             // window.location.href = "nextpage.html";
           } else {
             alert(
@@ -61,18 +53,9 @@
             inlogged = true;
             goToNextPage();
             return;
-            // const newerValue = data.newerValue;
-            // const newValue = data.newValue;
-            // if (newerValue === newValue) {
-            //   goToNextPage();
-            //   return;
-            // } else {
-            //   alert("Je bent niet ingelogd.");
-            // }
           } else {
-            let inlogged = false;
-            // setTimeout(showRegistering(), 3000);
-            alert(data.message); // Toon een bericht van de server bij fouten
+            inlogged = false;
+            // alert(data.message); // Toon een bericht van de server bij fouten
           }
         } catch (error) {
           console.error("Fout bij het ophalen van de loginstatus:", error);
@@ -81,12 +64,6 @@
       function goToNextPage() {
         window.location.href = "nextpage.html";
       }
-      // function showLoging() {
-      //   document.getElementById("logging").style.display = "block";
-      // }
-      // function showRegistering() {
-      //   document.getElementById("registering").style.display = "block";
-      // }
     </script>
   </body>
 </html>

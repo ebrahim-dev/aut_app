@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rgister</title>
+    <title>Rgistering system</title>
   </head>
   <body>
-    <h1>Rigister your email</h1>
+    <h1>Rigister your email in our new login system "Passwordless"</h1>
     <form id="addValueForm">
       <label for="email">E-mail:</label>
       <input type="text" id="email" name="email" required /><br /><br />
@@ -27,13 +27,6 @@
         .getElementById("addValueForm")
         .addEventListener("submit", function (e) {
           e.preventDefault();
-
-          const email = document.getElementById("email").value;
-          const privateKey = document.getElementById("privateKey").value;
-
-          console.log("Email:", email);
-          console.log("Private Key:", privateKey);
-
           fetch("http://localhost:4000/addNewValue", {
             method: "POST",
             headers: {

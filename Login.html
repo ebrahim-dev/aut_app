@@ -6,6 +6,7 @@
     <title>Authen</title>
   </head>
   <body>
+    <h1>Een manier om een privatekey te gebruiken:</h1>
     <h1>Logging your email</h1>
     <form id="addValueForm">
       <label for="email">E-mail:</label>
@@ -47,7 +48,7 @@
             .then((response) => response.json())
             .then((data) => {
               if (data.success) {
-                alert("Nieuwe waarde toegevoegd!");
+                alert("Het lukt wel, he hebt 30 seconden om in te loggen!");
               } else {
                 alert("Er is iets fout gegaan. Controleer uw gegevens.");
               }
