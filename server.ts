@@ -162,7 +162,8 @@ app.post("/addNewValue", (req, res) => {
     }
 
     if (!privateKeyIsValid(privateKey)) {
-      res.json({ success: false, message: "Ongeldige privésleutel" });
+      console.log(email);
+      res.json({ success: false, message: "Ongeldige private-key" });
       return;
     }
 
