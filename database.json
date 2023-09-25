@@ -160,7 +160,10 @@
     },
     "gg": {
       "publicKey": "0305e89457335762e3c4a2374cecc8e3",
-      "privateKey": "gggggggg"
+      "privateKey": "gggggggg",
+      "generatedNumber": 191883,
+      "newerValue": "",
+      "newValue": "5cbf819b1370f5bff00c9e6ed207b389"
     }
   }
 }

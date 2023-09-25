@@ -50,7 +50,8 @@
               if (data.success) {
                 alert("Het lukt wel, he hebt 30 seconden om in te loggen!");
               } else {
-                alert("Er is iets fout gegaan. Controleer uw gegevens.");
+                // alert("Er is iets fout gegaan. Controleer uw gegevens.");
+                alert(data.message);
               }
             })
             .catch((error) => {

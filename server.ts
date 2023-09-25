@@ -170,7 +170,8 @@ app.post("/compaireNewValue", (req, res) => {
     if (newerValue !== existingValue) {
       res.json({
         success: false,
-        message: "Nieuwe waarde komt niet overeen met bestaande waarde",
+        message:
+          "Wil je alsjeblieft in onze nieuwe wachtwoordloze inlogmethode registreren?",
       });
       return;
     }

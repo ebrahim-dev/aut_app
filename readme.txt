@@ -14,4 +14,4 @@ Hoe werkt het?
 2- in VS zelf open een nieuwe terminal.
 3- In de nieuwe terminal type: ts-node server.ts om de server live te hebben
 4- open de volgende bestanden met "open with live server": index.html, Login.html, Register.htm en wachtwoordloze.html
-5- om de database in je browser te kunnen zien: in je eigen browser open: http://localhost:4000/users
+5- om de database in je browser te kunnen zien: in je eigen browser open: http://localhost:4000/users 
