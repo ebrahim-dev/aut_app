@@ -11,31 +11,24 @@
     <button onclick="login()">Login</button>
 
     <script>
+      let inlogged = false; // Voeg deze variabele toe
+
+      async function generateOneTimeToken() {
+        const token = [...Array(32)]
+          .map(() => Math.random().toString(16)[2])
+          .join("");
+        return token;
+      }
+
       async function login() {
         const userEmail = document.getElementById("loginEmail").value;
         if (userEmail) {
-          const response = await fetch("http://localhost:4000/passwordless", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email: userEmail,
-            }),
-          });
-          // showLoging();
-          const data = await response.json();
-          if (data.success) {
-            localStorage.setItem("userEmail", userEmail);
-            await checkLoginStatus(userEmail);
-            if (inlogged == false) {
-              alert("Please use your private key then try it again");
-            }
-            // window.location.href = "nextpage.html";
-          } else {
-            alert(
-              "Ongeldige e-mail. Please register in our new login system (passwordless)."
-            );
+          const oneTimeToken = await generateOneTimeToken(); // Wacht op het genereren van het token
+          localStorage.setItem("oneTimeToken", oneTimeToken);
+          localStorage.setItem("userEmail", userEmail);
+          await checkLoginStatus(userEmail);
+          if (inlogged == false) {
+            alert("Please use your private key then try it again");
           }
         }
       }
@@ -55,12 +48,12 @@
             return;
           } else {
             inlogged = false;
-            // alert(data.message); // Toon een bericht van de server bij fouten
           }
         } catch (error) {
           console.error("Fout bij het ophalen van de loginstatus:", error);
         }
       }
+
       function goToNextPage() {
         window.location.href = "nextpage.html";
       }

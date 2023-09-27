@@ -3,8 +3,73 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
-    <h1>Welcome!</h1>
+    <title>Welcome Page</title>
+    <style>
+      .hidden {
+        display: none;
+      }
+    </style>
   </head>
-  <body></body>
+  <body>
+    <div>
+      Je bent ingelogd.
+      <p id="hiddenElement" class="hidden">
+        Deze pagina wordt over <span id="countdown">29</span> seconden
+        vernieuwd.
+      </p>
+    </div>
+    <script>
+      setTimeout(() => {
+        const hiddenElement = document.getElementById("hiddenElement");
+        hiddenElement.classList.remove("hidden");
+      }, 30000);
+
+      document.addEventListener("DOMContentLoaded", async function () {
+        const userEmail = localStorage.getItem("userEmail");
+        const oneTimeToken = localStorage.getItem("oneTimeToken");
+
+        if (userEmail && oneTimeToken) {
+          try {
+            const response = await fetch(
+              `http://localhost:4000/welcomePage?email=${encodeURIComponent(
+                userEmail
+              )}&token=${oneTimeToken}&fromPasswordless=true`
+            );
+
+            const data = await response.text();
+
+            // Voeg de ontvangen HTML-inhoud toe aan de pagina
+            document.body.innerHTML += data;
+          } catch (error) {
+            console.error("Error fetching welcome page:", error);
+          }
+        } else {
+          alert("User not logged in or one-time token missing.");
+          window.location.href = "wachtwoordloze.html"; // Stuur niet-ingelogde gebruikers terug naar de inlogpagina
+        }
+      });
+      function startNewInterval() {
+        document.addEventListener("DOMContentLoaded", function () {
+          let countdown = 59; // 59 seconden
+
+          const countdownInterval = setInterval(function () {
+            if (countdown <= 0) {
+              clearInterval(countdownInterval);
+              const response = confirm("Wil je blijven ingelogd?");
+              if (!response) {
+                window.location.href = "logout.html"; // Stuur naar uitlogpagina
+              } else {
+                // Als de gebruiker kiest om ingelogd te blijven, start de timer opnieuw
+                location.reload(); // Refresh de pagina
+              }
+            } else {
+              document.getElementById("countdown").innerText = countdown;
+              countdown--;
+            }
+          }, 1000); // Update elke 1 seconde
+        });
+      }
+      startNewInterval();
+    </script>
+  </body>
 </html>

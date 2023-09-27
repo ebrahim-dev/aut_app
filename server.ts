@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import * as crypto from "crypto";
 import cors from "cors";
 import fs from "fs";
+import { timingSafeEqual } from "crypto";
 
 const app = express();
 app.use(express.json());
@@ -13,6 +14,7 @@ interface User {
   generatedNumber?: number; // Voeg de gegenereerde nummer eigenschap toe als een optioneel veld
   newValue?: string; // Voeg de newValue eigenschap toe
   newerValue?: string; // Voeg de newerValue eigenschap toe
+  oneTimeToken?: string; // Voeg een veld voor de eenmalige token toe aan de gebruikersgegevens
 }
 
 function loadUsers(): { [key: string]: User } {
@@ -59,6 +61,12 @@ function generateNewerValue(publicKey: string, privateKey: string): string {
   return hashedValue;
 }
 
+// Nieuwe functie om een eenmalige token te genereren
+function generateOneTimeToken() {
+  const token = crypto.randomBytes(32).toString("hex");
+  return token;
+}
+
 let users: { [key: string]: User } = loadUsers();
 
 app.post("/register", (req: Request, res: Response) => {
@@ -86,12 +94,22 @@ function privateKeyIsValid(privateKey: string): boolean {
   return privateKey.length >= 8;
 }
 
+// Nieuwe route om een eenmalige token te genereren en te associëren met een gebruiker
 app.post("/passwordless", (req: Request, res: Response) => {
-  const { email } = req.body;
+  const { email, token } = req.body;
+
   if (users[email]) {
-    res.json({ success: true });
+    const oneTimeToken = users[email].oneTimeToken;
+
+    if (oneTimeToken && oneTimeToken === token) {
+      delete users[email].oneTimeToken; // Verwijder de eenmalige token na succesvol inloggen
+
+      res.json({ success: true });
+    } else {
+      res.json({ success: false, message: "Ongeldige token" });
+    }
   } else {
-    res.json({ success: false });
+    res.json({ success: false, message: "Gebruiker niet gevonden" });
   }
 });
 
@@ -202,8 +220,9 @@ app.post("/compaireNewValue", (req, res) => {
     res.status(500).json({ success: false, message: "Interne serverfout" });
   }
 });
+// Nieuwe route om de loginstatus te controleren
 app.get("/public/getLoginStatus", (req, res) => {
-  const email = req.query.email as string; // Specificeer dat 'email' een string is
+  const email = req.query.email as string;
 
   try {
     if (!email) {
@@ -244,6 +263,54 @@ app.get("/public/getLoginStatus", (req, res) => {
     console.error("Fout bij het ophalen van de loginstatus:", error);
     res.status(500).json({ success: false, message: "Interne serverfout" });
   }
+});
+
+app.get("/welcomePage", (req, res) => {
+  const userEmail = req.query.email as string;
+  const oneTimeToken = req.query.token as string;
+  if (typeof userEmail === "string" && typeof oneTimeToken === "string") {
+    const user = users[userEmail];
+    // Set user.oneTimeToken to the value of oneTimeToken
+    user.oneTimeToken = oneTimeToken;
+    if (
+      user &&
+      user.oneTimeToken &&
+      timingSafeEqual(
+        Buffer.from(user.oneTimeToken, "hex"),
+        Buffer.from(oneTimeToken, "hex")
+      )
+    ) {
+      // Token is geldig
+      // Verwijder de eenmalige token om te voorkomen dat deze opnieuw kan worden gebruikt
+      delete user.oneTimeToken;
+      // Vervolg met het genereren van de welkomstpagina
+      const welcomePageContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Welcome Page</title>
+          </head>
+          <body>
+            <h1>Welcome, ${userEmail}!</h1>
+            <!-- Voeg hier andere content toe op basis van gebruikersgegevens -->
+          </body>
+        </html>
+      `;
+      res.send(welcomePageContent);
+      user.oneTimeToken = undefined;
+    } else {
+      console.log(user?.oneTimeToken);
+      console.log(oneTimeToken);
+      res.status(403).send("Toegang geweigerd");
+    }
+  } else {
+    res.status(400).send("Ongeldige queryparameters: email en token");
+  }
+});
+app.get("/logout", (req, res) => {
+  res.sendFile(__dirname + "/logout.html");
 });
 
 app.listen(4000, () => {
