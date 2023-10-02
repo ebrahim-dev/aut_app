@@ -1,5 +1,10 @@
 {
   "dependencies": {
+    "@github/webauthn-json": "^2.1.1",
+    "@passwordless-id/webauthn": "^1.2.6",
+    "@simplewebauthn/browser": "^8.2.1",
+    "@simplewebauthn/server": "^8.2.0",
+    "@simplewebauthn/typescript-types": "^8.0.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "express": "^4.18.2",
