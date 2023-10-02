@@ -3,47 +3,50 @@ import * as crypto from "crypto";
 import cors from "cors";
 import fs from "fs";
 import { timingSafeEqual } from "crypto";
+import {
+  generateRegistrationOptions,
+  VerifyRegistrationResponseOpts,
+  verifyRegistrationResponse,
+} from "@simplewebauthn/server";
+import bodyParser from "body-parser";
+// CommonJS (NodeJS)
+
+// ES Module (NodeJS w/module support, TypeScript, Babel, etc...)
+import SimpleWebAuthnServer from "@simplewebauthn/server";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(bodyParser.json());
 
 interface User {
   publicKey: string;
   privateKey: string;
-  generatedNumber?: number; // Voeg de gegenereerde nummer eigenschap toe als een optioneel veld
-  newValue?: string; // Voeg de newValue eigenschap toe
-  newerValue?: string; // Voeg de newerValue eigenschap toe
-  oneTimeToken?: string; // Voeg een veld voor de eenmalige token toe aan de gebruikersgegevens
+  generatedNumber?: number;
+  newValue?: string;
+  newerValue?: string;
+  oneTimeToken?: string;
+  authenticator?: any; // Voeg een veld voor authenticator toe
+  newestValue?: any;
+  credential?: any;
 }
 
-function loadUsers(): { [key: string]: User } {
-  try {
-    const data = fs.readFileSync("database.json", "utf-8");
-    const loadedUsers = JSON.parse(data).users || {};
-
-    // Voeg de newValue eigenschap toe aan bestaande gebruikers
-    for (const key in loadedUsers) {
-      if (
-        loadedUsers.hasOwnProperty(key) &&
-        !loadedUsers[key].newValue &&
-        !loadedUsers[key].newerValue
-      ) {
-        loadedUsers[key].newValue = "2"; // Voeg hier de gewenste waarde toe
-        loadedUsers[key].newerValue = "3"; // Voeg hier de gewenste waarde toe
-      }
-    }
-
-    return loadedUsers;
-  } catch (error) {
-    return {};
-  }
+const users: Record<string, User> = {}; // Database simulatie
+function generateServerPublicKey() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)))
+    .map((v) => v.toString(16).padStart(2, "0"))
+    .join("");
 }
+app.get("/getPublicKey", (req, res) => {
+  const publicKey = generateServerPublicKey(); // Genereer een willekeurige openbare sleutel
+  res.json(publicKey);
+});
 
-function saveUsers(users: { [key: string]: User }) {
+function saveUsers(): void {
   const dataToSave = JSON.stringify({ users }, null, 2);
   fs.writeFileSync("database.json", dataToSave, "utf-8");
 }
+
 function generateNewValue(publicKey: string, privateKey: string): string {
   const combinedValue = `${publicKey}-${privateKey}`;
   const hashedValue = crypto
@@ -52,6 +55,7 @@ function generateNewValue(publicKey: string, privateKey: string): string {
     .digest("hex");
   return hashedValue;
 }
+
 function generateNewerValue(publicKey: string, privateKey: string): string {
   const combinedValue = `${publicKey}-${privateKey}`;
   const hashedValue = crypto
@@ -61,20 +65,17 @@ function generateNewerValue(publicKey: string, privateKey: string): string {
   return hashedValue;
 }
 
-// Nieuwe functie om een eenmalige token te genereren
-function generateOneTimeToken() {
+function generateOneTimeToken(): string {
   const token = crypto.randomBytes(32).toString("hex");
   return token;
 }
-
-let users: { [key: string]: User } = loadUsers();
 
 app.post("/register", (req: Request, res: Response) => {
   const { email, publicKey, privateKey } = req.body;
 
   if (!users[email] && privateKeyIsValid(privateKey)) {
     users[email] = { publicKey, privateKey };
-    saveUsers(users);
+    saveUsers();
     res.json({ success: true });
   } else if (users[email]) {
     res.json({
@@ -85,6 +86,72 @@ app.post("/register", (req: Request, res: Response) => {
     res.json({ success: false, message: "Ongeldige private sleutel" });
   }
 });
+app.get("/generate-registration-options", (req: Request, res: Response) => {
+  const { email } = req.body;
+  if (!users[email]) {
+    // (Pseudocode) Retrieve the user from the database
+    // after they've logged in
+    const user: UserModel = getUserFromDB(loggedInUserId);
+    // (Pseudocode) Retrieve any of the user's previously-
+    // registered authenticators
+    const userAuthenticators: Authenticator[] = getUserAuthenticators(user);
+
+    const options = generateRegistrationOptions({
+      rpName,
+      rpID,
+      userID: user.id,
+      userName: user.username,
+      // Don't prompt users for additional information about the authenticator
+      // (Recommended for smoother UX)
+      attestationType: "none",
+      // Prevent users from re-registering existing authenticators
+      excludeCredentials: userAuthenticators.map((authenticator) => ({
+        id: authenticator.credentialID,
+        type: "public-key",
+        // Optional
+        transports: authenticator.transports,
+      })),
+    });
+
+    // (Pseudocode) Remember the challenge for this user
+    setUserCurrentChallenge(user, options.challenge);
+
+    return options;
+  }
+  const { body } = req;
+
+  // (Pseudocode) Retrieve the logged-in user
+  const user: UserModel = getUserFromDB(loggedInUserId);
+  // (Pseudocode) Get `options.challenge` that was saved above
+  const expectedChallenge: string = getUserCurrentChallenge(user);
+
+  let verification;
+  try {
+    verification = await verifyRegistrationResponse({
+      response: body,
+      expectedChallenge,
+      expectedOrigin: origin,
+      expectedRPID: rpID,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(400).send({ error: error.message });
+  }
+
+  const { verified } = verification;
+  const { registrationInfo } = verification;
+  const { credentialPublicKey, credentialID, counter } = registrationInfo;
+
+  const newAuthenticator: Authenticator = {
+    credentialID,
+    credentialPublicKey,
+    counter,
+  };
+
+  // (Pseudocode) Save the authenticator info so that we can
+  // get it by user ID later
+  saveNewUserAuthenticatorInDB(user, newAuthenticator);
+});
 
 app.get("/users", (req: Request, res: Response) => {
   res.json(users);
@@ -94,7 +161,6 @@ function privateKeyIsValid(privateKey: string): boolean {
   return privateKey.length >= 8;
 }
 
-// Nieuwe route om een eenmalige token te genereren en te associëren met een gebruiker
 app.post("/passwordless", (req: Request, res: Response) => {
   const { email, token } = req.body;
 
@@ -102,8 +168,7 @@ app.post("/passwordless", (req: Request, res: Response) => {
     const oneTimeToken = users[email].oneTimeToken;
 
     if (oneTimeToken && oneTimeToken === token) {
-      delete users[email].oneTimeToken; // Verwijder de eenmalige token na succesvol inloggen
-
+      delete users[email].oneTimeToken;
       res.json({ success: true });
     } else {
       res.json({ success: false, message: "Ongeldige token" });
@@ -117,7 +182,6 @@ app.post("/addNewValue", (req, res) => {
   try {
     const { email, privateKey } = req.body;
 
-    // Voer hier de benodigde validaties uit
     if (!email || !privateKey) {
       res.json({
         success: false,
@@ -132,16 +196,12 @@ app.post("/addNewValue", (req, res) => {
       return;
     }
 
-    // Haal de public key op uit de gebruikersgegevens
     const publicKey = users[email].publicKey;
 
-    // Genereer de nieuwe waarde
     const newValue = generateNewValue(publicKey, privateKey);
 
-    // Genereer een willekeurig nummer (voorbeeld)
     const generatedNumber = Math.floor(Math.random() * 1000000);
 
-    // Voeg de waarden toe aan de database
     users[email] = {
       publicKey,
       privateKey,
@@ -149,8 +209,7 @@ app.post("/addNewValue", (req, res) => {
       newValue,
     };
 
-    // Sla de gebruikersgegevens op
-    saveUsers(users);
+    saveUsers();
 
     res.json({ success: true });
   } catch (error) {
@@ -163,7 +222,6 @@ app.post("/compaireNewValue", (req, res) => {
   try {
     const { email, privateKey } = req.body;
 
-    // Voer hier de benodigde validaties uit
     if (!email || !privateKey) {
       res.json({
         success: false,
@@ -177,14 +235,10 @@ app.post("/compaireNewValue", (req, res) => {
       return;
     }
 
-    // Haal de public key op uit de gebruikersgegevens
     const publicKey = users[email].publicKey;
-    // Haal de bestaande 'newValue' op uit de database
     const existingValue = users[email].newValue;
-    // Genereer de nieuwe waarde
     const newerValue = generateNewerValue(publicKey, privateKey);
 
-    // Vergelijk 'newerValue' met 'existingValue'
     if (newerValue !== existingValue) {
       res.json({
         success: false,
@@ -194,25 +248,22 @@ app.post("/compaireNewValue", (req, res) => {
       return;
     }
 
-    // Genereer een willekeurig nummer (voorbeeld)
     const generatedNumber = users[email].generatedNumber;
 
-    // Voeg de waarden toe aan de database
     users[email] = {
       publicKey,
       privateKey,
       generatedNumber,
       newerValue,
-      // Voeg 'existingValue' toe als 'newValue'
       newValue: existingValue,
     };
-    // Wacht 30 seconden voordat je newerValue naar een lege string wijzigt
+
     setTimeout(() => {
       users[email].newerValue = "";
-      saveUsers(users);
+      saveUsers();
     }, 30000);
-    // Sla de gebruikersgegevens op
-    saveUsers(users);
+
+    saveUsers();
 
     res.json({ success: true });
   } catch (error) {
@@ -220,95 +271,89 @@ app.post("/compaireNewValue", (req, res) => {
     res.status(500).json({ success: false, message: "Interne serverfout" });
   }
 });
-// Nieuwe route om de loginstatus te controleren
-app.get("/public/getLoginStatus", (req, res) => {
-  const email = req.query.email as string;
 
+app.get("/public/getLoginStatus", (req, res) => {
+  const { email } = req.query;
+
+  if (users[email as string]) {
+    const { generatedNumber, newerValue } = users[email as string];
+    res.json({ success: true, generatedNumber, newerValue });
+  } else {
+    res.json({ success: false, message: "Gebruiker niet gevonden" });
+  }
+});
+
+app.post("/verifyFingerprint", async (req, res) => {
   try {
-    if (!email) {
-      res.json({
-        success: false,
-        message: "E-mail is vereist",
-      });
-      return;
-    }
+    const { email, assertion } = req.body;
+    console.log(req.body);
 
     const user = users[email];
-
     if (!user) {
-      res.json({
-        success: false,
-        message: "Gebruiker niet gevonden",
-      });
+      res.json({ success: false, message: "Gebruiker niet gevonden" });
       return;
     }
 
-    const newerValue = user.newerValue;
-    const newValue = user.newValue;
-    if (newValue !== newerValue) {
-      res.json({
-        success: false,
-        message: "Nog niet ingelogd niet gevonden",
-      });
-      return;
-    } else if (newValue === newerValue) {
-      res.json({ success: true, newerValue, newValue });
+    const publicKeyBytes = new Uint8Array(
+      atob(user.publicKey)
+        .split("")
+        .map((c) => c.charCodeAt(0))
+    );
+
+    const authenticator = {
+      id: assertion.id,
+      type: "public-key",
+    };
+
+    const expectedChallenge = assertion.challenge;
+    const expectedOrigin = "http://localhost:4000"; // Pas dit aan naar de juiste URL
+
+    const verificationResult = await verifyRegistrationResponse({
+      response: {
+        /* Voeg hier de eigenschappen toe die vereist zijn voor RegistrationResponseJSON */
+      },
+      expectedChallenge,
+      expectedOrigin,
+    } as VerifyRegistrationResponseOpts);
+
+    if (verificationResult.verified) {
+      res.json({ success: true });
     } else {
       res.json({
         success: false,
-        message: "Database fout",
+        message: "Vingerafdruk kon niet worden geverifieerd",
       });
     }
   } catch (error) {
-    console.error("Fout bij het ophalen van de loginstatus:", error);
-    res.status(500).json({ success: false, message: "Interne serverfout" });
+    console.error("Error:", error);
+    res.status(500).json({
+      success: false,
+      message:
+        "Er is een fout opgetreden bij het verifiëren van de vingerafdruk.",
+    });
+  }
+});
+app.post("/registerUser", (req, res) => {
+  try {
+    const { email, fingerprint } = req.body;
+
+    // Voeg de gebruiker toe aan de database en koppel de vingerafdruk
+    users[email] = {
+      publicKey: email.publicKey,
+      privateKey: email.privateKey,
+      newestValue: fingerprint, // Koppel de vingerafdruk aan de gebruiker
+    };
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Er is een fout opgetreden bij het registreren.",
+    });
   }
 });
 
-app.get("/welcomePage", (req, res) => {
-  const userEmail = req.query.email as string;
-  const oneTimeToken = req.query.token as string;
-  if (typeof userEmail === "string" && typeof oneTimeToken === "string") {
-    const user = users[userEmail];
-    // Set user.oneTimeToken to the value of oneTimeToken
-    user.oneTimeToken = oneTimeToken;
-    if (
-      user &&
-      user.oneTimeToken &&
-      timingSafeEqual(
-        Buffer.from(user.oneTimeToken, "hex"),
-        Buffer.from(oneTimeToken, "hex")
-      )
-    ) {
-      // Token is geldig
-      // Verwijder de eenmalige token om te voorkomen dat deze opnieuw kan worden gebruikt
-      delete user.oneTimeToken;
-      // Vervolg met het genereren van de welkomstpagina
-      const welcomePageContent = `
-        <!DOCTYPE html>
-        <html lang="en">
-          <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>Welcome Page</title>
-          </head>
-          <body>
-            <h1>Welcome, ${userEmail}!</h1>
-            <!-- Voeg hier andere content toe op basis van gebruikersgegevens -->
-          </body>
-        </html>
-      `;
-      res.send(welcomePageContent);
-      user.oneTimeToken = undefined;
-    } else {
-      console.log(user?.oneTimeToken);
-      console.log(oneTimeToken);
-      res.status(403).send("Toegang geweigerd");
-    }
-  } else {
-    res.status(400).send("Ongeldige queryparameters: email en token");
-  }
-});
 app.get("/logout", (req, res) => {
   res.sendFile(__dirname + "/logout.html");
 });

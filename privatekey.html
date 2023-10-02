@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vingerafdruk Verificatie</title>
+  </head>
+  <body>
+    <h1>Vingerafdruk Verificatie</h1>
+
+    <form id="verifyFingerprintForm">
+      <label for="email"
+        >E-mail:
+        <input type="text" id="email" name="email" required />
+      </label>
+      <br /><br />
+
+      <button type="button" onclick="verifyFingerprint()">
+        Verifieer Vingerafdruk
+      </button>
+      <br /><br />
+    </form>
+
+    <script>
+      async function verifyFingerprint() {
+        try {
+          const email = document.getElementById("email").value; // Haal de waarde van het e-mailveld op
+
+          const response = await fetch(
+            "http://localhost:4000/verifyFingerprint",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json", // Stel het content-type in op JSON
+              },
+              body: JSON.stringify({ email: email }), // Stuur de e-mail als JSON naar de server
+            }
+          );
+          console.log(email);
+          const result = await response.json();
+
+          if (result.success) {
+            alert("Vingerafdruk geverifieerd!");
+          } else {
+            alert(result.message);
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert(
+            "Er is een fout opgetreden bij het verifiëren van de vingerafdruk."
+          );
+        }
+      }
+    </script>
+  </body>
+</html>
