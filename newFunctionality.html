@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Public Key Generator</title>
+  </head>
+  <body>
+    <h1>Public Key Generator</h1>
+
+    <h2>Generate Public Key</h2>
+    <input id="email" type="text" placeholder="E-mail" /><br />
+    <input id="privateKey" type="text" placeholder="Private Key" /><br />
+    <button onclick="generate()">Generate Public Key</button>
+    <p id="generatedPublicKey"></p>
+
+    <h2>Retrieve Details from Public Key</h2>
+    <input id="publicKey" type="text" placeholder="Public Key" /><br />
+    <button onclick="retrieve()">Retrieve Details</button>
+    <p id="retrievedDetails"></p>
+    <p id="regeneratedPublicKey"></p>
+
+    <h2>Generate from Details</h2>
+    <button onclick="generateFromDetails()">Generate from Details</button>
+    <p id="generatedFromDetails"></p>
+
+    <h2>Show Details from Generated Public Key</h2>
+    <button onclick="showDetailsFromGenerated()">
+      Show Details from Generated Public Key
+    </button>
+    <p id="processedResult"></p>
+    <p id="newGeneratedDetails"></p>
+
+    <script>
+      async function generatePublicKey(email, privateKey) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(`${email}-${privateKey}`);
+        const buffer = await crypto.subtle.digest("SHA-256", data);
+        return Array.from(new Uint8Array(buffer))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+
+      async function retrieveDetailsFromPublicKey(publicKey) {
+        const email = hexToString(publicKey.slice(0, 10));
+        const privateKey = hexToString(publicKey.slice(10));
+        return [email, privateKey];
+      }
+
+      function hexToString(hex) {
+        let str = "";
+        for (let i = 0; i < hex.length; i += 2) {
+          const charCode = parseInt(hex.substr(i, 2), 16);
+          str += String.fromCharCode(charCode);
+        }
+        return str;
+      }
+
+      async function generate() {
+        const email = document.getElementById("email").value;
+        const privateKey = document.getElementById("privateKey").value;
+        const publicKey = await generatePublicKey(email, privateKey);
+        document.getElementById(
+          "generatedPublicKey"
+        ).innerText = `Generated Public Key: ${publicKey}`;
+
+        // Automatically fill the Retrieve Details from Public Key field
+        document.getElementById("publicKey").value = publicKey;
+
+        // Automatically trigger the retrieve function
+        retrieve();
+      }
+
+      async function retrieve() {
+        const publicKey = document.getElementById("publicKey").value;
+
+        if (publicKey) {
+          const details = await retrieveDetailsFromPublicKey(publicKey);
+
+          if (details) {
+            const [email, privateKey] = details;
+            const resultText = `Email: ${email}\nPrivate Sleutel: ${privateKey}`;
+            document.getElementById("retrievedDetails").innerText = resultText;
+
+            // Regenerate the public key and display it
+            const regeneratedPublicKey = await generatePublicKey(
+              email,
+              privateKey
+            );
+            document.getElementById(
+              "regeneratedPublicKey"
+            ).innerText = `Regenerated Public Key: ${regeneratedPublicKey}`;
+
+            // Automatically fill the Generated from Details field
+            document.getElementById(
+              "generatedFromDetails"
+            ).innerText = `Generated Public Key from Details: ${publicKey}`;
+
+            // Automatically trigger the Show Details from Generated Public Key function
+            showDetailsFromGenerated();
+          } else {
+            document.getElementById("retrievedDetails").innerText =
+              "Geen details gevonden voor deze Public Key";
+          }
+        } else {
+          document.getElementById("retrievedDetails").innerText =
+            "Vul een Public Key in om details op te halen.";
+        }
+      }
+
+      async function generateFromDetails() {
+        const retrievedDetails =
+          document.getElementById("retrievedDetails").innerText;
+        const [email, privateKey] = parseDetails(retrievedDetails);
+
+        if (email && privateKey) {
+          const newPublicKey = await generatePublicKey(email, privateKey);
+          document.getElementById(
+            "generatedFromDetails"
+          ).innerText = `Generated Public Key from Details: ${newPublicKey}`;
+
+          return { email, privateKey, newPublicKey };
+        } else {
+          document.getElementById("generatedFromDetails").innerText =
+            "Kan geen nieuwe openbare sleutel genereren zonder geldige gegevens.";
+          return null;
+        }
+      }
+
+      async function showDetailsFromGenerated() {
+        const processedResult = await generateFromDetails();
+
+        if (processedResult) {
+          const { email, privateKey, newPublicKey } = processedResult;
+          document.getElementById(
+            "processedResult"
+          ).innerText = `Email: ${email}\nPrivate Sleutel: ${privateKey}`;
+          document.getElementById(
+            "newGeneratedDetails"
+          ).innerText = `Email: ${email}\nPrivate Sleutel: ${privateKey}\nNew Public Key: ${newPublicKey}`;
+        } else {
+          document.getElementById("processedResult").innerText =
+            "Kan geen details verwerken zonder geldige gegevens.";
+          document.getElementById("newGeneratedDetails").innerText = "";
+        }
+      }
+
+      function parseDetails(details) {
+        const matches = details.match(/Email: (.+)\nPrivate Sleutel: (.+)/);
+        if (matches && matches.length === 3) {
+          return [matches[1], matches[2]];
+        } else {
+          return [null, null];
+        }
+      }
+    </script>
+  </body>
+</html>
