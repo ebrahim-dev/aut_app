@@ -15,7 +15,7 @@
     <p id="generatedPublicKey"></p>
 
     <h2>Retrieve Details from Public Key</h2>
-    <input id="publicKey" type="text" placeholder="Public Key" /><br />
+    <input id="publicKey" type="text" placeholder="Ondertekening" /><br />
     <button onclick="retrieve()">Retrieve Details</button>
     <p id="retrievedDetails"></p>
     <p id="regeneratedPublicKey"></p>
@@ -28,10 +28,32 @@
     <button onclick="showDetailsFromGenerated()">
       Show Details from Generated Public Key
     </button>
+    <button onclick="clering()">Clearing data</button>
     <p id="processedResult"></p>
     <p id="newGeneratedDetails"></p>
+    <h1>Registratieformulier</h1>
+    <form id="registrationForm">
+      <label for="getEmail">E-mail:</label>
+      <input type="email" id="getEmail" name="getEmail" required /><br /><br />
+      <label for="newerPublicKey">New Public Key:</label>
+      <input type="text" id="newerPublicKey" name="newerPublicKey" required />
+      <br /><br />
+      <label for="onderTekening">Ondertekening:</label>
+      <input type="text" id="onderTekening" name="onderTekening" required />
+      <br /><br />
+      <label for="sign1">Ondertekening:</label>
+      <input type="text" id="sign1" name="sign1" required />
+      <br /><br />
+      <label for="sign2">Ondertekening:</label>
+      <input type="text" id="sign2" name="sign2" required />
+      <br /><br />
+      <input type="submit" value="Registreren" />
+    </form>
 
     <script>
+      function clering() {
+        localStorage.clear();
+      }
       async function generatePublicKey(email, privateKey) {
         const encoder = new TextEncoder();
         const data = encoder.encode(`${email}-${privateKey}`);
@@ -62,7 +84,9 @@
         const publicKey = await generatePublicKey(email, privateKey);
         document.getElementById(
           "generatedPublicKey"
-        ).innerText = `Generated Public Key: ${publicKey}`;
+        ).innerText = `Ondertekening: ${publicKey}`;
+        document.getElementById("getEmail").value = email;
+        document.getElementById("onderTekening").value = publicKey;
 
         // Automatically fill the Retrieve Details from Public Key field
         document.getElementById("publicKey").value = publicKey;
@@ -80,24 +104,27 @@
           if (details) {
             const [email, privateKey] = details;
             const resultText = `Email: ${email}\nPrivate Sleutel: ${privateKey}`;
+            document.getElementById("sign1").value = email;
+            document.getElementById("sign2").value = privateKey;
+
             document.getElementById("retrievedDetails").innerText = resultText;
 
             // Regenerate the public key and display it
-            const regeneratedPublicKey = await generatePublicKey(
-              email,
-              privateKey
-            );
-            document.getElementById(
-              "regeneratedPublicKey"
-            ).innerText = `Regenerated Public Key: ${regeneratedPublicKey}`;
+            // const regeneratedPublicKey = await generatePublicKey(
+            //   email + privateKey
+            // );
+            // document.getElementById(
+            //   "regeneratedPublicKey"
+            // ).innerText = `Regenerated Public Key: ${regeneratedPublicKey}`;
 
             // Automatically fill the Generated from Details field
-            document.getElementById(
-              "generatedFromDetails"
-            ).innerText = `Generated Public Key from Details: ${publicKey}`;
+            // document.getElementById(
+            //   "generatedFromDetails"
+            // ).innerText = `Generated Public Key from Details: ${publicKey}`;
 
             // Automatically trigger the Show Details from Generated Public Key function
-            showDetailsFromGenerated();
+            //
+            generateFromDetails();
           } else {
             document.getElementById("retrievedDetails").innerText =
               "Geen details gevonden voor deze Public Key";
@@ -115,11 +142,14 @@
 
         if (email && privateKey) {
           const newPublicKey = await generatePublicKey(email, privateKey);
+          document.getElementById("newerPublicKey").value = newPublicKey;
           document.getElementById(
             "generatedFromDetails"
           ).innerText = `Generated Public Key from Details: ${newPublicKey}`;
+          const sign1 = email;
+          const sign2 = privateKey;
 
-          return { email, privateKey, newPublicKey };
+          return { email, privateKey, newPublicKey, sign1, sign2 };
         } else {
           document.getElementById("generatedFromDetails").innerText =
             "Kan geen nieuwe openbare sleutel genereren zonder geldige gegevens.";
@@ -132,12 +162,66 @@
 
         if (processedResult) {
           const { email, privateKey, newPublicKey } = processedResult;
-          document.getElementById(
-            "processedResult"
-          ).innerText = `Email: ${email}\nPrivate Sleutel: ${privateKey}`;
+          const userDetails = {
+            email,
+            privateKey,
+          };
+          // Haal bestaande gegevens op (als die er zijn)
+          let existingDetails =
+            JSON.parse(localStorage.getItem("userDetails")) || [];
+
+          // Controleer of existingDetails een array is
+          if (!Array.isArray(existingDetails)) {
+            existingDetails = [];
+          }
+
+          // Voeg nieuwe gegevens toe aan de bestaande gegevens
+          existingDetails.push(userDetails);
+          // Converteer naar JSON-string en sla op in localStorage
+          localStorage.setItem("userDetails", JSON.stringify(existingDetails));
+          // existingDetails = [];
+          // localStorage.clear();
+
+          console.log(existingDetails);
           document.getElementById(
             "newGeneratedDetails"
           ).innerText = `Email: ${email}\nPrivate Sleutel: ${privateKey}\nNew Public Key: ${newPublicKey}`;
+        } else {
+          document.getElementById("processedResult").innerText =
+            "Kan geen details verwerken zonder geldige gegevens.";
+          document.getElementById("newGeneratedDetails").innerText = "";
+        }
+      }
+      async function showingDetailsFromGenerated() {
+        const processedResult = await generateFromDetails();
+
+        if (processedResult) {
+          const { email, privateKey, newPublicKey } = processedResult;
+          const userDetails = {
+            email,
+            privateKey,
+          };
+
+          // Stuur de gegevens naar de server
+          const response = await fetch("http://localhost:4000/savedData", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userDetails),
+          });
+
+          if (response.ok) {
+            console.log("Gegevens succesvol naar de server gestuurd.");
+          } else {
+            console.error(
+              "Fout bij het verzenden van gegevens naar de server."
+            );
+          }
+
+          console.log(
+            `Email: ${email}\nPrivate Sleutel: ${privateKey}\nNew Public Key: ${newPublicKey}`
+          );
         } else {
           document.getElementById("processedResult").innerText =
             "Kan geen details verwerken zonder geldige gegevens.";
@@ -153,6 +237,43 @@
           return [null, null];
         }
       }
+
+      document
+        .getElementById("registrationForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          var getEmail = document.getElementById("getEmail").value;
+          var newerPublicKey = document.getElementById("newerPublicKey").value;
+          var ondertekening = document.getElementById("onderTekening").value;
+          var sign1 = document.getElementById("sign1").value;
+          var sign2 = document.getElementById("sign2").value;
+
+          // Stuur de gegevens naar de server
+          fetch("http://localhost:4000/registerUser", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              getEmail,
+              newerPublicKey,
+              ondertekening,
+              sign1,
+              sign2,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                showingDetailsFromGenerated();
+                showDetailsFromGenerated();
+                alert("Registratie succesvol!");
+              } else {
+                alert("Registratie mislukt: " + data.message);
+              }
+            })
+            .catch((error) => console.error("Fout bij registratie:", error));
+        });
     </script>
   </body>
 </html>

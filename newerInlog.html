@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inloggen</title>
+  </head>
+  <body>
+    <h1>Inloggen</h1>
+    <label for="email">E-mail:</label>
+    <input type="email" id="email" required />
+    <button onclick="login()">Inloggen</button>
+    <div id="signatureDisplay"></div>
+    <h2>Opdracht ondertekenen</h2>
+    <input id="opdracht" type="text" placeholder="Ondertekening" /><br />
+    <button onclick="retrieve()">Ondertekening</button>
+    <p id="retrievedDetails"></p>
+    <button onclick="login1()">verzenden</button>
+    <input id="sign1"></input>
+    <input id="sign2"></input>
+
+    <script src="client.js"></script>
+  </body>
+</html>

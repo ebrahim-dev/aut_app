@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registratieformulier</title>
+  </head>
+  <body>
+    <h1>Registratieformulier</h1>
+    <form id="registrationForm">
+      <label for="email">E-mail:</label>
+      <input type="email" id="email" name="email" required /><br /><br />
+      <label for="newPublicKey">New Public Key:</label>
+      <input type="text" id="newPublicKey" name="newPublicKey" required />
+      <label for="onderTekening">Ondertekening:</label>
+      <input type="text" id="onderTekening" name="onderTekening" required />
+      <br /><br />
+      <input type="submit" value="Registreren" />
+    </form>
+
+    <script>
+      document
+        .getElementById("registrationForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          var email = document.getElementById("email").value;
+          var newPublicKey = document.getElementById("newPublicKey").value;
+          var ondertekening = document.getElementById("onderTekening").value;
+
+          // Stuur de gegevens naar de server
+          fetch("http://localhost:4000/registerUser", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, newPublicKey, ondertekening }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert("Registratie succesvol!");
+              } else {
+                alert("Registratie mislukt: " + data.message);
+              }
+            })
+            .catch((error) => console.error("Fout bij registratie:", error));
+        });
+    </script>
+  </body>
+</html>

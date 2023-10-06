@@ -3,6 +3,8 @@ import * as crypto from "crypto";
 import cors from "cors";
 import fs from "fs";
 import { timingSafeEqual } from "crypto";
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(express.json());
@@ -15,6 +17,13 @@ interface User {
   newValue?: string; // Voeg de newValue eigenschap toe
   newerValue?: string; // Voeg de newerValue eigenschap toe
   oneTimeToken?: string; // Voeg een veld voor de eenmalige token toe aan de gebruikersgegevens
+}
+interface UserData {
+  email: string;
+  newPublicKey: string;
+  ondertekening: string;
+  signing1?: string;
+  signing2?: string;
 }
 
 function loadUsers(): { [key: string]: User } {
@@ -309,8 +318,149 @@ app.get("/welcomePage", (req, res) => {
     res.status(400).send("Ongeldige queryparameters: email en token");
   }
 });
+let newDatabase: UserData[] = [];
+
+// Controleer of het bestand bestaat
+if (fs.existsSync("newDatabase.json")) {
+  const data = fs.readFileSync("newDatabase.json", "utf-8");
+  newDatabase = JSON.parse(data);
+}
+
+function saveDatabase() {
+  const dataToSave = JSON.stringify(newDatabase, null, 2);
+  fs.writeFileSync("newDatabase.json", dataToSave, "utf-8");
+}
+
+app.post("/registerUser", (req, res) => {
+  const { getEmail, newerPublicKey, ondertekening, sign1, sign2 } = req.body;
+
+  if (getEmail && newerPublicKey) {
+    // Controleer of de gebruiker al in de database staat
+    const existingUser = newDatabase.find((user) => user.email === getEmail);
+
+    if (existingUser) {
+      res.json({ success: false, message: "Je bent al geregistreerd" });
+      return;
+    }
+    let email = getEmail;
+    let newPublicKey = newerPublicKey;
+    let signing1 = sign1;
+    let signing2 = sign2;
+    // Voeg de gebruiker toe aan de database
+    newDatabase.push({
+      email,
+      newPublicKey,
+      ondertekening,
+      signing1,
+      signing2,
+    });
+    saveDatabase(); // Sla de gegevens op naar het JSON-bestand
+
+    res.json({ success: true });
+  } else {
+    res.json({ success: false, message: "Ongeldige gegevens" });
+  }
+});
+// app.post("/login", (req, res) => {
+//   const { email, publicKey, signature } = req.body;
+
+//   // Zoek de gebruiker in de database
+//   const user = database.find(
+//     (user) => user.email === email && user.newPublicKey === publicKey
+//   );
+
+//   if (!user) {
+//     res.json({ success: false, message: "Ongeldige inloggegevens" });
+//     return;
+//   }
+
+//   // Controleer of de handtekening overeenkomt
+//   if (user.ondertekening === signature) {
+//     res.json({ success: true });
+//   } else {
+//     res.json({ success: false, message: "Ongeldige handtekening" });
+//   }
+// });
+
+app.get("/viewDatabase", (req: Request, res: Response) => {
+  res.json(newDatabase);
+});
+
 app.get("/logout", (req, res) => {
   res.sendFile(__dirname + "/logout.html");
+});
+
+app.post("/savedData", (req, res) => {
+  const userDetails = req.body;
+
+  let existingDetails =
+    JSON.parse(fs.readFileSync("browserData.json", "utf-8")) || [];
+
+  if (!Array.isArray(existingDetails)) {
+    existingDetails = [];
+  }
+
+  existingDetails.push(userDetails);
+
+  fs.writeFileSync(
+    "browserData.json",
+    JSON.stringify(existingDetails, null, 2)
+  );
+
+  res.send({ success: true });
+});
+
+app.post("/newerLogin", (req, res) => {
+  const { email } = req.body;
+  let database = JSON.parse(fs.readFileSync("newDatabase.json", "utf8"));
+
+  const user = database.find((entry: { email: any }) => entry.email === email);
+
+  if (user) {
+    // Als de gebruiker gevonden is, stuur de ondertekening terug naar de client
+    res.json({ success: true, signature: user.ondertekening });
+  } else {
+    res.json({ success: false, signature: null });
+  }
+});
+// app.post("/newerLogin1", (req, res) => {
+//   const { email, sign1, sign2 } = req.body;
+
+//   let database = JSON.parse(fs.readFileSync("newDatabase.json", "utf8"));
+//   const user = database.find((entry: { email: any }) => entry.email === email);
+
+//   if (user) {
+//     // Vergelijk sign1 en sign2 met de waarden in de database
+//     console.log(user);
+//     if (sign1 === user.sign1 && sign2 === user.sign2) {
+//       res.json({ success: true });
+//     } else {
+//       res.json({ success: false });
+//     }
+//   } else {
+//     res.json({ success: false });
+//   }
+// });
+let database = JSON.parse(fs.readFileSync("newDatabase.json", "utf8")); // Laad de bestaande database
+
+app.post("/newerLogin1", (req, res) => {
+  // Laad de bestaande database bij elk verzoek
+  const database = JSON.parse(fs.readFileSync("newDatabase.json", "utf8"));
+  const { email, sign1, sign2 } = req.body;
+  console.log(req.body);
+
+  const user = database.find((entry: { email: any }) => entry.email === email);
+
+  if (user) {
+    if (sign1 === user.signing1 && sign2 === user.signing2) {
+      res.json({ success: true, token: "sampletoken" }); // Vervang "sampletoken" door de gegenereerde JWT token
+    } else {
+      res.json({ success: false, token: null });
+    }
+    console.log(user);
+  } else {
+    res.json({ success: false, token: null });
+  }
 });
 
 app.listen(4000, () => {
