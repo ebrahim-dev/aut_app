@@ -1,23 +1,11 @@
 import express, { Request, Response } from "express";
-import * as crypto from "crypto";
 import cors from "cors";
 import fs from "fs";
-import { timingSafeEqual } from "crypto";
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-interface User {
-  publicKey: string;
-  privateKey: string;
-  generatedNumber?: number; // Voeg de gegenereerde nummer eigenschap toe als een optioneel veld
-  newValue?: string; // Voeg de newValue eigenschap toe
-  newerValue?: string; // Voeg de newerValue eigenschap toe
-  oneTimeToken?: string; // Voeg een veld voor de eenmalige token toe aan de gebruikersgegevens
-}
 interface UserData {
   email: string;
   newPublicKey: string;
@@ -26,309 +14,17 @@ interface UserData {
   signing2?: string;
 }
 
-function loadUsers(): { [key: string]: User } {
-  try {
-    const data = fs.readFileSync("database.json", "utf-8");
-    const loadedUsers = JSON.parse(data).users || {};
-
-    // Voeg de newValue eigenschap toe aan bestaande gebruikers
-    for (const key in loadedUsers) {
-      if (
-        loadedUsers.hasOwnProperty(key) &&
-        !loadedUsers[key].newValue &&
-        !loadedUsers[key].newerValue
-      ) {
-        loadedUsers[key].newValue = "2"; // Voeg hier de gewenste waarde toe
-        loadedUsers[key].newerValue = "3"; // Voeg hier de gewenste waarde toe
-      }
-    }
-
-    return loadedUsers;
-  } catch (error) {
-    return {};
-  }
-}
-
-function saveUsers(users: { [key: string]: User }) {
-  const dataToSave = JSON.stringify({ users }, null, 2);
-  fs.writeFileSync("database.json", dataToSave, "utf-8");
-}
-function generateNewValue(publicKey: string, privateKey: string): string {
-  const combinedValue = `${publicKey}-${privateKey}`;
-  const hashedValue = crypto
-    .createHash("md5")
-    .update(combinedValue)
-    .digest("hex");
-  return hashedValue;
-}
-function generateNewerValue(publicKey: string, privateKey: string): string {
-  const combinedValue = `${publicKey}-${privateKey}`;
-  const hashedValue = crypto
-    .createHash("md5")
-    .update(combinedValue)
-    .digest("hex");
-  return hashedValue;
-}
-
-// Nieuwe functie om een eenmalige token te genereren
-function generateOneTimeToken() {
-  const token = crypto.randomBytes(32).toString("hex");
-  return token;
-}
-
-let users: { [key: string]: User } = loadUsers();
-
-app.post("/register", (req: Request, res: Response) => {
-  const { email, publicKey, privateKey } = req.body;
-
-  if (!users[email] && privateKeyIsValid(privateKey)) {
-    users[email] = { publicKey, privateKey };
-    saveUsers(users);
-    res.json({ success: true });
-  } else if (users[email]) {
-    res.json({
-      success: false,
-      message: "Dit e-mailadres is al geregistreerd",
-    });
-  } else {
-    res.json({ success: false, message: "Ongeldige private sleutel" });
-  }
-});
-
-app.get("/users", (req: Request, res: Response) => {
-  res.json(users);
-});
-
-function privateKeyIsValid(privateKey: string): boolean {
-  return privateKey.length >= 8;
-}
-
-// Nieuwe route om een eenmalige token te genereren en te associëren met een gebruiker
-app.post("/passwordless", (req: Request, res: Response) => {
-  const { email, token } = req.body;
-
-  if (users[email]) {
-    const oneTimeToken = users[email].oneTimeToken;
-
-    if (oneTimeToken && oneTimeToken === token) {
-      delete users[email].oneTimeToken; // Verwijder de eenmalige token na succesvol inloggen
-
-      res.json({ success: true });
-    } else {
-      res.json({ success: false, message: "Ongeldige token" });
-    }
-  } else {
-    res.json({ success: false, message: "Gebruiker niet gevonden" });
-  }
-});
-
-app.post("/addNewValue", (req, res) => {
-  try {
-    const { email, privateKey } = req.body;
-
-    // Voer hier de benodigde validaties uit
-    if (!email || !privateKey) {
-      res.json({
-        success: false,
-        message: "E-mail en privésleutel zijn vereist",
-      });
-      return;
-    }
-
-    if (!privateKeyIsValid(privateKey)) {
-      console.log(email);
-      res.json({ success: false, message: "Ongeldige private-key" });
-      return;
-    }
-
-    // Haal de public key op uit de gebruikersgegevens
-    const publicKey = users[email].publicKey;
-
-    // Genereer de nieuwe waarde
-    const newValue = generateNewValue(publicKey, privateKey);
-
-    // Genereer een willekeurig nummer (voorbeeld)
-    const generatedNumber = Math.floor(Math.random() * 1000000);
-
-    // Voeg de waarden toe aan de database
-    users[email] = {
-      publicKey,
-      privateKey,
-      generatedNumber,
-      newValue,
-    };
-
-    // Sla de gebruikersgegevens op
-    saveUsers(users);
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Fout bij het verwerken van het verzoek:", error);
-    res.status(500).json({ success: false, message: "Interne serverfout" });
-  }
-});
-
-app.post("/compaireNewValue", (req, res) => {
-  try {
-    const { email, privateKey } = req.body;
-
-    // Voer hier de benodigde validaties uit
-    if (!email || !privateKey) {
-      res.json({
-        success: false,
-        message: "E-mail en privésleutel zijn vereist",
-      });
-      return;
-    }
-
-    if (!privateKeyIsValid(privateKey)) {
-      res.json({ success: false, message: "Ongeldige privésleutel" });
-      return;
-    }
-
-    // Haal de public key op uit de gebruikersgegevens
-    const publicKey = users[email].publicKey;
-    // Haal de bestaande 'newValue' op uit de database
-    const existingValue = users[email].newValue;
-    // Genereer de nieuwe waarde
-    const newerValue = generateNewerValue(publicKey, privateKey);
-
-    // Vergelijk 'newerValue' met 'existingValue'
-    if (newerValue !== existingValue) {
-      res.json({
-        success: false,
-        message:
-          "Wil je alsjeblieft in onze nieuwe wachtwoordloze inlogmethode registreren?",
-      });
-      return;
-    }
-
-    // Genereer een willekeurig nummer (voorbeeld)
-    const generatedNumber = users[email].generatedNumber;
-
-    // Voeg de waarden toe aan de database
-    users[email] = {
-      publicKey,
-      privateKey,
-      generatedNumber,
-      newerValue,
-      // Voeg 'existingValue' toe als 'newValue'
-      newValue: existingValue,
-    };
-    // Wacht 30 seconden voordat je newerValue naar een lege string wijzigt
-    setTimeout(() => {
-      users[email].newerValue = "";
-      saveUsers(users);
-    }, 30000);
-    // Sla de gebruikersgegevens op
-    saveUsers(users);
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Fout bij het verwerken van het verzoek:", error);
-    res.status(500).json({ success: false, message: "Interne serverfout" });
-  }
-});
-// Nieuwe route om de loginstatus te controleren
-app.get("/public/getLoginStatus", (req, res) => {
-  const email = req.query.email as string;
-
-  try {
-    if (!email) {
-      res.json({
-        success: false,
-        message: "E-mail is vereist",
-      });
-      return;
-    }
-
-    const user = users[email];
-
-    if (!user) {
-      res.json({
-        success: false,
-        message: "Gebruiker niet gevonden",
-      });
-      return;
-    }
-
-    const newerValue = user.newerValue;
-    const newValue = user.newValue;
-    if (newValue !== newerValue) {
-      res.json({
-        success: false,
-        message: "Nog niet ingelogd niet gevonden",
-      });
-      return;
-    } else if (newValue === newerValue) {
-      res.json({ success: true, newerValue, newValue });
-    } else {
-      res.json({
-        success: false,
-        message: "Database fout",
-      });
-    }
-  } catch (error) {
-    console.error("Fout bij het ophalen van de loginstatus:", error);
-    res.status(500).json({ success: false, message: "Interne serverfout" });
-  }
-});
-
-app.get("/welcomePage", (req, res) => {
-  const userEmail = req.query.email as string;
-  const oneTimeToken = req.query.token as string;
-  if (typeof userEmail === "string" && typeof oneTimeToken === "string") {
-    const user = users[userEmail];
-    // Set user.oneTimeToken to the value of oneTimeToken
-    user.oneTimeToken = oneTimeToken;
-    if (
-      user &&
-      user.oneTimeToken &&
-      timingSafeEqual(
-        Buffer.from(user.oneTimeToken, "hex"),
-        Buffer.from(oneTimeToken, "hex")
-      )
-    ) {
-      // Token is geldig
-      // Verwijder de eenmalige token om te voorkomen dat deze opnieuw kan worden gebruikt
-      delete user.oneTimeToken;
-      // Vervolg met het genereren van de welkomstpagina
-      const welcomePageContent = `
-        <!DOCTYPE html>
-        <html lang="en">
-          <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>Welcome Page</title>
-          </head>
-          <body>
-            <h1>Welcome, ${userEmail}!</h1>
-            <!-- Voeg hier andere content toe op basis van gebruikersgegevens -->
-          </body>
-        </html>
-      `;
-      res.send(welcomePageContent);
-      user.oneTimeToken = undefined;
-    } else {
-      console.log(user?.oneTimeToken);
-      console.log(oneTimeToken);
-      res.status(403).send("Toegang geweigerd");
-    }
-  } else {
-    res.status(400).send("Ongeldige queryparameters: email en token");
-  }
-});
 let newDatabase: UserData[] = [];
 
 // Controleer of het bestand bestaat
-if (fs.existsSync("newDatabase.json")) {
-  const data = fs.readFileSync("newDatabase.json", "utf-8");
+if (fs.existsSync("serverDatabase.json")) {
+  const data = fs.readFileSync("serverDatabase.json", "utf-8");
   newDatabase = JSON.parse(data);
 }
 
 function saveDatabase() {
   const dataToSave = JSON.stringify(newDatabase, null, 2);
-  fs.writeFileSync("newDatabase.json", dataToSave, "utf-8");
+  fs.writeFileSync("serverDatabase.json", dataToSave, "utf-8");
 }
 
 app.post("/registerUser", (req, res) => {
@@ -361,26 +57,6 @@ app.post("/registerUser", (req, res) => {
     res.json({ success: false, message: "Ongeldige gegevens" });
   }
 });
-// app.post("/login", (req, res) => {
-//   const { email, publicKey, signature } = req.body;
-
-//   // Zoek de gebruiker in de database
-//   const user = database.find(
-//     (user) => user.email === email && user.newPublicKey === publicKey
-//   );
-
-//   if (!user) {
-//     res.json({ success: false, message: "Ongeldige inloggegevens" });
-//     return;
-//   }
-
-//   // Controleer of de handtekening overeenkomt
-//   if (user.ondertekening === signature) {
-//     res.json({ success: true });
-//   } else {
-//     res.json({ success: false, message: "Ongeldige handtekening" });
-//   }
-// });
 
 app.get("/viewDatabase", (req: Request, res: Response) => {
   res.json(newDatabase);
@@ -412,7 +88,7 @@ app.post("/savedData", (req, res) => {
 
 app.post("/newerLogin", (req, res) => {
   const { email } = req.body;
-  let database = JSON.parse(fs.readFileSync("newDatabase.json", "utf8"));
+  let database = JSON.parse(fs.readFileSync("serverDatabase.json", "utf8"));
 
   const user = database.find((entry: { email: any }) => entry.email === email);
 
@@ -423,31 +99,11 @@ app.post("/newerLogin", (req, res) => {
     res.json({ success: false, signature: null });
   }
 });
-// app.post("/newerLogin1", (req, res) => {
-//   const { email, sign1, sign2 } = req.body;
-
-//   let database = JSON.parse(fs.readFileSync("newDatabase.json", "utf8"));
-//   const user = database.find((entry: { email: any }) => entry.email === email);
-
-//   if (user) {
-//     // Vergelijk sign1 en sign2 met de waarden in de database
-//     console.log(user);
-//     if (sign1 === user.sign1 && sign2 === user.sign2) {
-//       res.json({ success: true });
-//     } else {
-//       res.json({ success: false });
-//     }
-//   } else {
-//     res.json({ success: false });
-//   }
-// });
-let database = JSON.parse(fs.readFileSync("newDatabase.json", "utf8")); // Laad de bestaande database
 
 app.post("/newerLogin1", (req, res) => {
   // Laad de bestaande database bij elk verzoek
-  const database = JSON.parse(fs.readFileSync("newDatabase.json", "utf8"));
+  const database = JSON.parse(fs.readFileSync("serverDatabase.json", "utf8"));
   const { email, sign1, sign2 } = req.body;
-  console.log(req.body);
 
   const user = database.find((entry: { email: any }) => entry.email === email);
 
@@ -457,7 +113,6 @@ app.post("/newerLogin1", (req, res) => {
     } else {
       res.json({ success: false, token: null });
     }
-    console.log(user);
   } else {
     res.json({ success: false, token: null });
   }

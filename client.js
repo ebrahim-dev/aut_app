@@ -1,4 +1,3 @@
-let verwerken = [];
 async function login() {
   const email = document.getElementById("email").value;
 
@@ -28,8 +27,6 @@ async function login1() {
   const email = document.getElementById("email").value;
   const sign1 = document.getElementById("sign1").value;
   const sign2 = document.getElementById("sign2").value;
-  console.log(sign1);
-  console.log(sign2);
 
   if (!sign1 || !sign2) {
     alert("Vul zowel sign1 als sign2 in.");
@@ -45,7 +42,6 @@ async function login1() {
   });
 
   const data = await response.json();
-  console.log(data);
 
   if (data.success) {
     const token = data.token;

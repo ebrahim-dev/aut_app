@@ -41,10 +41,10 @@
       <label for="onderTekening">Ondertekening:</label>
       <input type="text" id="onderTekening" name="onderTekening" required />
       <br /><br />
-      <label for="sign1">Ondertekening:</label>
+      <label for="sign1">Sign1:</label>
       <input type="text" id="sign1" name="sign1" required />
       <br /><br />
-      <label for="sign2">Ondertekening:</label>
+      <label for="sign2">Sign2:</label>
       <input type="text" id="sign2" name="sign2" required />
       <br /><br />
       <input type="submit" value="Registreren" />
@@ -64,9 +64,9 @@
       }
 
       async function retrieveDetailsFromPublicKey(publicKey) {
-        const email = hexToString(publicKey.slice(0, 10));
-        const privateKey = hexToString(publicKey.slice(10));
-        return [email, privateKey];
+        const signal1 = hexToString(publicKey.slice(0, 10));
+        const signal2 = hexToString(publicKey.slice(10));
+        return [signal1, signal2];
       }
 
       function hexToString(hex) {
@@ -102,10 +102,10 @@
           const details = await retrieveDetailsFromPublicKey(publicKey);
 
           if (details) {
-            const [email, privateKey] = details;
-            const resultText = `Email: ${email}\nPrivate Sleutel: ${privateKey}`;
-            document.getElementById("sign1").value = email;
-            document.getElementById("sign2").value = privateKey;
+            const [signal1, signal2] = details;
+            const resultText = `Signal1: ${signal1}\nSignal2: ${signal2}`;
+            document.getElementById("sign1").value = signal1;
+            document.getElementById("sign2").value = signal2;
 
             document.getElementById("retrievedDetails").innerText = resultText;
 
@@ -138,16 +138,19 @@
       async function generateFromDetails() {
         const retrievedDetails =
           document.getElementById("retrievedDetails").innerText;
-        const [email, privateKey] = parseDetails(retrievedDetails);
+        const [signal1, signal2] = parseDetails(retrievedDetails);
 
-        if (email && privateKey) {
-          const newPublicKey = await generatePublicKey(email, privateKey);
+        if (signal1 && signal2) {
+          const newPublicKey = await generatePublicKey(signal1, signal2);
           document.getElementById("newerPublicKey").value = newPublicKey;
           document.getElementById(
             "generatedFromDetails"
           ).innerText = `Generated Public Key from Details: ${newPublicKey}`;
-          const sign1 = email;
-          const sign2 = privateKey;
+          const sign1 = signal1;
+          const sign2 = signal2;
+          const email = document.getElementById("email").value;
+          const privateKey = document.getElementById("privateKey").value;
+          console.log(email);
 
           return { email, privateKey, newPublicKey, sign1, sign2 };
         } else {
@@ -161,10 +164,13 @@
         const processedResult = await generateFromDetails();
 
         if (processedResult) {
-          const { email, privateKey, newPublicKey } = processedResult;
+          const { email, privateKey, newPublicKey, sign1, sign2 } =
+            processedResult;
           const userDetails = {
             email,
             privateKey,
+            sign1,
+            sign2,
           };
           // Haal bestaande gegevens op (als die er zijn)
           let existingDetails =
@@ -185,7 +191,7 @@
           console.log(existingDetails);
           document.getElementById(
             "newGeneratedDetails"
-          ).innerText = `Email: ${email}\nPrivate Sleutel: ${privateKey}\nNew Public Key: ${newPublicKey}`;
+          ).innerText = `Email: ${email}\nPrivate Sleutel: ${privateKey}\nNew Public Key: ${newPublicKey}\nSign1: ${sign1}\nSign2: ${sign2}`;
         } else {
           document.getElementById("processedResult").innerText =
             "Kan geen details verwerken zonder geldige gegevens.";
@@ -196,10 +202,13 @@
         const processedResult = await generateFromDetails();
 
         if (processedResult) {
-          const { email, privateKey, newPublicKey } = processedResult;
+          const { email, privateKey, newPublicKey, sign1, sign2 } =
+            processedResult;
           const userDetails = {
             email,
             privateKey,
+            sign1,
+            sign2,
           };
 
           // Stuur de gegevens naar de server
@@ -220,7 +229,7 @@
           }
 
           console.log(
-            `Email: ${email}\nPrivate Sleutel: ${privateKey}\nNew Public Key: ${newPublicKey}`
+            `Email: ${email}\nPrivate Sleutel: ${privateKey}\nNew Public Key: ${newPublicKey}\nSign1: ${sign1}\nSign2:${sign2}`
           );
         } else {
           document.getElementById("processedResult").innerText =
@@ -230,7 +239,7 @@
       }
 
       function parseDetails(details) {
-        const matches = details.match(/Email: (.+)\nPrivate Sleutel: (.+)/);
+        const matches = details.match(/Signal1: (.+)\nSignal2: (.+)/);
         if (matches && matches.length === 3) {
           return [matches[1], matches[2]];
         } else {
