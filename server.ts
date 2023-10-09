@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import fs from "fs";
+import * as crypto from "crypto";
 
 const app = express();
 app.use(express.json());
@@ -12,9 +13,13 @@ interface UserData {
   ondertekening: string;
   signing1?: string;
   signing2?: string;
+  signing3?: string;
+  signing4?: string;
 }
 
 let newDatabase: UserData[] = [];
+let sign3: string = "";
+let sign4: string = "";
 
 // Controleer of het bestand bestaat
 if (fs.existsSync("serverDatabase.json")) {
@@ -86,7 +91,7 @@ app.post("/savedData", (req, res) => {
   res.send({ success: true });
 });
 
-app.post("/newerLogin", (req, res) => {
+app.post("/newerLogin", async (req, res) => {
   const { email } = req.body;
   let database = JSON.parse(fs.readFileSync("serverDatabase.json", "utf8"));
 
@@ -95,6 +100,12 @@ app.post("/newerLogin", (req, res) => {
   if (user) {
     // Als de gebruiker gevonden is, stuur de ondertekening terug naar de client
     res.json({ success: true, signature: user.ondertekening });
+    await printIt(user.ondertekening);
+    // Update de gebruiker in de database
+    user.signing3 = sign3;
+    user.signing4 = sign4;
+    // Schrijf de bijgewerkte database terug naar het bestand
+    fs.writeFileSync("serverDatabase.json", JSON.stringify(database, null, 2));
   } else {
     res.json({ success: false, signature: null });
   }
@@ -117,6 +128,28 @@ app.post("/newerLogin1", (req, res) => {
     res.json({ success: false, token: null });
   }
 });
+
+async function retrieveDetailsFromPublicKey(opdracht: any) {
+  const signal1 = hexToString(opdracht.slice(0, 10));
+  const signal2 = hexToString(opdracht.slice(10));
+  return [signal1, signal2];
+}
+function hexToString(hex: any) {
+  let str = "";
+  for (let i = 0; i < hex.length; i += 2) {
+    const charCode = parseInt(hex.substr(i, 2), 16);
+    str += String.fromCharCode(charCode);
+  }
+  return str;
+}
+async function printIt(opdracht: any) {
+  const details = await retrieveDetailsFromPublicKey(opdracht);
+  if (details) {
+    const [signal3, signal4] = details;
+    sign3 = signal3;
+    sign4 = signal4;
+  }
+}
 
 app.listen(4000, () => {
   console.log("Server is gestart op http://localhost:4000");
