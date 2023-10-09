@@ -32,8 +32,8 @@
     "ondertekening": "127887b0f8ee684ef1b8e39ba1050d4fe34550ad2b5b413209e98c79e3a9f560",
     "signing1": "\u0012x°ø",
     "signing2": "îhNñ¸ã¡\u0005OãEP­+[A2\téyã©õ`",
-    "signing3": "",
-    "signing4": ""
+    "signing3": "\u0012x°ø",
+    "signing4": "îhNñ¸ã¡\u0005\rOãEP­+[A2\téyã©õ`"
   },
   {
     "email": "444@gmail.com",
@@ -43,41 +43,5 @@
     "signing2": "\u0019C/pyÊÒÕA«ÖZL_d\u001bn\u001cø\u000eQ\u0005QC",
     "signing3": "F¶h&°",
     "signing4": "\u0019C/pyÊÒÕA«ÖZL_d\u001bn\u001cø\u000eQ\u0005QC"
-  },
-  {
-    "email": "555@gmail.com",
-    "newPublicKey": "74d79c90717e057e76108d1742c83425377e8443aaee4dbad6cf453b93255ff4",
-    "ondertekening": "80930cf075d7f4cc14da019c03980eb7ea4200bf0dc1ed67fdbb18f6ab7e51d9",
-    "signing1": "\fðu",
-    "signing2": "×ôÌ\u0014Ú\u0001\u0003\u000e·êB\u0000¿Áígý»\u0018ö«~QÙ",
-    "signing3": "\fðu",
-    "signing4": "×ôÌ\u0014Ú\u0001\u0003\u000e·êB\u0000¿\rÁígý»\u0018ö«~QÙ"
-  },
-  {
-    "email": "666@gmail.com",
-    "newPublicKey": "16637f5b445f0f8ba143184812d74478114050d0ff9441f153b1136eeb1155f3",
-    "ondertekening": "4dde7a667ecb51bcf8f39eb0c524413b70f4de4f24fc0974b41e3811d6db32b2",
-    "signing1": "MÞzf~",
-    "signing2": "ËQ¼øó°Å$A;pôÞO$ü\tt´\u001e8\u0011ÖÛ2²",
-    "signing3": "MÞzf~",
-    "signing4": "ËQ¼øó°Å$A;pôÞO$ü\tt´\u001e8\u0011ÖÛ2²"
-  },
-  {
-    "email": "777@gmail.com",
-    "newPublicKey": "b9b7d1a81fcebb5b9adafd99026dcdb8fd69635210d78196bfe552200b3876fb",
-    "ondertekening": "da084432748e48468956c7e1dadd4a7fb73a8ec5ace73b070ee8d45b08abff71",
-    "signing1": "Ú\bD2t",
-    "signing2": "HFVÇáÚÝJ·:Å¬ç;\u0007\u000eèÔ[\b«ÿq",
-    "signing3": "Ú\bD2t",
-    "signing4": "HFVÇáÚÝJ·:Å¬ç;\u0007\u000eèÔ[\b«ÿq"
-  },
-  {
-    "email": "888@gmail.com",
-    "newPublicKey": "7b024d917fa55fd2911e138ef6995923cfa345514828c897d08638cd504052d5",
-    "ondertekening": "8d7c261e2dcd6bb3305d52de9168acd4321c396f67bdb0650a06d6d5228a633f",
-    "signing1": "|&\u001e-",
-    "signing2": "Ík³0]RÞh¬Ô2\u001c9og½°e\u0006ÖÕ\"c?",
-    "signing3": "|&\u001e-",
-    "signing4": "Ík³0]RÞh¬Ô2\u001c9og½°e\n\u0006ÖÕ\"c?"
   }
 ]

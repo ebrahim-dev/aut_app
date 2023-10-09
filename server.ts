@@ -16,7 +16,6 @@ interface UserData {
   signing3?: string;
   signing4?: string;
 }
-
 let newDatabase: UserData[] = [];
 let sign3: string = "";
 let sign4: string = "";
@@ -99,13 +98,13 @@ app.post("/newerLogin", async (req, res) => {
 
   if (user) {
     // Als de gebruiker gevonden is, stuur de ondertekening terug naar de client
-    res.json({ success: true, signature: user.ondertekening });
     await printIt(user.ondertekening);
     // Update de gebruiker in de database
     user.signing3 = sign3;
     user.signing4 = sign4;
-    // Schrijf de bijgewerkte database terug naar het bestand
-    fs.writeFileSync("serverDatabase.json", JSON.stringify(database, null, 2));
+    //Schrijf de bijgewerkte database terug naar het bestand
+    // fs.writeFileSync("serverDatabase.json", JSON.stringify(database, null, 2));
+    res.json({ success: true, signature: user.ondertekening });
   } else {
     res.json({ success: false, signature: null });
   }
@@ -119,8 +118,14 @@ app.post("/newerLogin1", (req, res) => {
   const user = database.find((entry: { email: any }) => entry.email === email);
 
   if (user) {
+    user.signing3 = sign3;
+    user.signing4 = sign4;
     if (sign1 === user.signing1 && sign2 === user.signing2) {
       res.json({ success: true, token: "sampletoken" }); // Vervang "sampletoken" door de gegenereerde JWT token
+      fs.writeFileSync(
+        "serverDatabase.json",
+        JSON.stringify(database, null, 2)
+      );
     } else {
       res.json({ success: false, token: null });
     }

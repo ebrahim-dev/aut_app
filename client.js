@@ -1,6 +1,4 @@
-async function login(event) {
-  event.preventDefault(); // Voorkom dat het formulier wordt ingediend
-
+async function login() {
   const email = document.getElementById("email").value;
 
   const response = await fetch("http://localhost:4000/newerLogin", {
