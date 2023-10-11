@@ -108,22 +108,6 @@
             document.getElementById("sign2").value = signal2;
 
             document.getElementById("retrievedDetails").innerText = resultText;
-
-            // Regenerate the public key and display it
-            // const regeneratedPublicKey = await generatePublicKey(
-            //   email + privateKey
-            // );
-            // document.getElementById(
-            //   "regeneratedPublicKey"
-            // ).innerText = `Regenerated Public Key: ${regeneratedPublicKey}`;
-
-            // Automatically fill the Generated from Details field
-            // document.getElementById(
-            //   "generatedFromDetails"
-            // ).innerText = `Generated Public Key from Details: ${publicKey}`;
-
-            // Automatically trigger the Show Details from Generated Public Key function
-            //
             generateFromDetails();
           } else {
             document.getElementById("retrievedDetails").innerText =
@@ -185,8 +169,6 @@
           existingDetails.push(userDetails);
           // Converteer naar JSON-string en sla op in localStorage
           localStorage.setItem("userDetails", JSON.stringify(existingDetails));
-          // existingDetails = [];
-          // localStorage.clear();
 
           console.log(existingDetails);
           document.getElementById(

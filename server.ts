@@ -103,8 +103,6 @@ app.post("/newerLogin", async (req, res) => {
     // Update de gebruiker in de database
     user.signing3 = sign3;
     user.signing4 = sign4;
-    //Schrijf de bijgewerkte database terug naar het bestand
-    // fs.writeFileSync("serverDatabase.json", JSON.stringify(database, null, 2));
     res.json({ success: true, signature: user.ondertekening });
   } else {
     res.json({ success: false, signature: null });
@@ -121,7 +119,7 @@ app.post("/newerLogin1", (req, res) => {
   if (user) {
     user.signing3 = sign1;
     user.signing4 = sign2;
-    if (sign3 === user.signing3 && sign3 === user.signing3) {
+    if (sign1 === user.signing3 && sign2 === user.signing4) {
       res.json({ success: true, token: "sampletoken" }); // Vervang "sampletoken" door de gegenereerde JWT token
       fs.writeFileSync(
         "serverDatabase.json",
@@ -162,30 +160,47 @@ async function printIt(opdracht: any) {
   }
 }
 app.post("/newerLogin2", async (req, res) => {
-  // Laad de bestaande database bij elk verzoek
-  const database = JSON.parse(fs.readFileSync("serverDatabase.json", "utf8"));
-  const { email, sign1, sign2 } = req.body;
+  try {
+    const database = JSON.parse(fs.readFileSync("serverDatabase.json", "utf8"));
+    const { email, sign1, sign2 } = req.body;
+    const user = database.find(
+      (entry: { email: any }) => entry.email === email
+    );
 
-  const user = database.find((entry: { email: any }) => entry.email === email);
+    if (!user) {
+      return res.json({ success: false, token: null });
+    }
 
-  if (user) {
-    if (user.signing1 === sign1) {
-      const newOndertekening = await generatePublicKey(sign1, sign2);
+    const newOndertekening = await generateChallenge(sign1, sign2);
+    // hier heb ik een probleem tegen gekomen, soms door het crypten bevat user.signing1 een letter minder of meer dan sign1 daarom heb ik includes gebruikt i.p.v ===
+    if (user.signing1.includes(sign1) || sign1.includes(user.signing1)) {
       await printIt(newOndertekening);
-      res.json({ success: true, token: "sampletoken" });
+
       user.ondertekening = newOndertekening;
       user.signing1 = sign3;
       user.signing2 = sign4;
+
       fs.writeFileSync(
         "serverDatabase.json",
         JSON.stringify(database, null, 2)
       );
+
+      if (fs.existsSync("serverDatabase.json")) {
+        const data = fs.readFileSync("serverDatabase.json", "utf-8");
+        newDatabase = JSON.parse(data);
+      }
+
+      return res.json({ success: true, token: "sampletoken" });
     }
-  } else {
+
+    return res.json({ success: false, token: null });
+  } catch (error) {
+    console.error("Error:", error);
     res.json({ success: false, token: null });
   }
 });
-async function generatePublicKey(key1: string, key2: string) {
+
+async function generateChallenge(key1: string, key2: string) {
   const encoder = new TextEncoder();
   const data = encoder.encode(`${key1}-${key2}`);
   const hash = crypto.createHash("sha256");
