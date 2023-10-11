@@ -11,37 +11,19 @@
   {
     "email": "111@gmail.com",
     "newPublicKey": "451653c759353fd758f1569b5265697d09e3d77271259e96064bc738a7f3a233",
-    "ondertekening": "c471b6cdf4426ea424c4599bd5d2a83adad0173b916fbae7cb8dc6a1e536ffe6",
-    "signing1": "Äq¶Íô",
-    "signing2": "Bn¤$ÄYÕÒ¨:ÚÐ\u0017;oºçËÆ¡å6ÿæ",
-    "signing3": "Äq¶Íô",
-    "signing4": "Bn¤$ÄYÕÒ¨:ÚÐ\u0017;oºçËÆ¡å6ÿæ"
+    "ondertekening": "f889a256a789ea919b9fdde7304ad3ce1b0ca33ad7433ce1eff463c4f55b95be",
+    "signing1": "ø¢V§",
+    "signing2": "êÝç0JÓÎ\u001b\f£:×C<áïôcÄõ[¾",
+    "signing3": "\u0002Õ¶Gë",
+    "signing4": "Ô}xqµu8÷ =¯öC\ftàni£÷r"
   },
   {
     "email": "222@gmail.com",
     "newPublicKey": "34987e835cd86a69382d0a3196784ebfcbb814e41614daf46bf0b4aaba0a89e3",
-    "ondertekening": "08f710129ab1d2a95e4512e21be0470e3c9ea48cf06f927462f89041b8b8ed2b",
-    "signing1": "\b÷\u0010\u0012",
-    "signing2": "±Ò©^E\u0012â\u001bàG\u000e<¤ðotbøA¸¸í+",
-    "signing3": "\b÷\u0010\u0012",
-    "signing4": "±Ò©^E\u0012â\u001bàG\u000e<¤ðotbøA¸¸í+"
-  },
-  {
-    "email": "333@gmail.com",
-    "newPublicKey": "f24634ef016ca7389ffa1435f39c9e1fede18b6bd0601179aae7ffce47cb84bb",
-    "ondertekening": "127887b0f8ee684ef1b8e39ba1050d4fe34550ad2b5b413209e98c79e3a9f560",
-    "signing1": "\u0012x°ø",
-    "signing2": "îhNñ¸ã¡\u0005OãEP­+[A2\téyã©õ`",
-    "signing3": "\u0012x°ø",
-    "signing4": "îhNñ¸ã¡\u0005\rOãEP­+[A2\téyã©õ`"
-  },
-  {
-    "email": "444@gmail.com",
-    "newPublicKey": "02c814cdae17252aaa5b849cba89bcae172fd5b57c848dd05ec8ed6c9fbab3e7",
-    "ondertekening": "46b66826b019432f7079ca90d2d58a8d41abd65a4c5f641b6e1cf80e51055143",
-    "signing1": "F¶h&°",
-    "signing2": "\u0019C/pyÊÒÕA«ÖZL_d\u001bn\u001cø\u000eQ\u0005QC",
-    "signing3": "F¶h&°",
-    "signing4": "\u0019C/pyÊÒÕA«ÖZL_d\u001bn\u001cø\u000eQ\u0005QC"
+    "ondertekening": "4851d3a917f0047a77162eb84876a07863ca4b94ef07c68a9b75906269561f9c",
+    "signing1": "HQÓ©\u0017",
+    "signing2": "ð\u0004zw\u0016.¸Hv xcÊKï\u0007ÆubiV\u001f",
+    "signing3": "ã\u0014óS",
+    "signing4": "\t.£\u0000\u0005=¬\u0006£|/§\u0000QBû3\u001fZ\u0006Ìø«"
   }
 ]

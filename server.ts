@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import fs from "fs";
 import * as crypto from "crypto";
+import { TextEncoder } from "text-encoding-utf-8";
 
 const app = express();
 app.use(express.json());
@@ -118,14 +119,19 @@ app.post("/newerLogin1", (req, res) => {
   const user = database.find((entry: { email: any }) => entry.email === email);
 
   if (user) {
-    user.signing3 = sign3;
-    user.signing4 = sign4;
-    if (sign1 === user.signing1 && sign2 === user.signing2) {
+    user.signing3 = sign1;
+    user.signing4 = sign2;
+    if (sign3 === user.signing3 && sign3 === user.signing3) {
       res.json({ success: true, token: "sampletoken" }); // Vervang "sampletoken" door de gegenereerde JWT token
       fs.writeFileSync(
         "serverDatabase.json",
         JSON.stringify(database, null, 2)
       );
+      // nu de server vernieuwen zonder te restarten
+      if (fs.existsSync("serverDatabase.json")) {
+        const data = fs.readFileSync("serverDatabase.json", "utf-8");
+        newDatabase = JSON.parse(data);
+      }
     } else {
       res.json({ success: false, token: null });
     }
@@ -154,6 +160,37 @@ async function printIt(opdracht: any) {
     sign3 = signal3;
     sign4 = signal4;
   }
+}
+app.post("/newerLogin2", async (req, res) => {
+  // Laad de bestaande database bij elk verzoek
+  const database = JSON.parse(fs.readFileSync("serverDatabase.json", "utf8"));
+  const { email, sign1, sign2 } = req.body;
+
+  const user = database.find((entry: { email: any }) => entry.email === email);
+
+  if (user) {
+    if (user.signing1 === sign1) {
+      const newOndertekening = await generatePublicKey(sign1, sign2);
+      await printIt(newOndertekening);
+      res.json({ success: true, token: "sampletoken" });
+      user.ondertekening = newOndertekening;
+      user.signing1 = sign3;
+      user.signing2 = sign4;
+      fs.writeFileSync(
+        "serverDatabase.json",
+        JSON.stringify(database, null, 2)
+      );
+    }
+  } else {
+    res.json({ success: false, token: null });
+  }
+});
+async function generatePublicKey(key1: string, key2: string) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(`${key1}-${key2}`);
+  const hash = crypto.createHash("sha256");
+  hash.update(data);
+  return hash.digest("hex");
 }
 
 app.listen(4000, () => {

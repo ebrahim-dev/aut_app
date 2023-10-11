@@ -44,9 +44,10 @@ async function login1() {
   const data = await response.json();
 
   if (data.success) {
+    await changingSignuture();
     const token = data.token;
     localStorage.setItem("token", token);
-    window.location.href = "/dashboard.html";
+    // window.location.href = "/dashboard.html";
   } else {
     alert("Inloggen mislukt. Controleer je gegevens.");
   }
@@ -82,8 +83,11 @@ async function generateFromDetails() {
   if (sign1 && sign2) {
     return { sign1, sign2 };
   } else {
-    document.getElementById("generatedFromDetails").innerText =
-      "Kan geen nieuwe openbare sleutel genereren zonder geldige gegevens.";
+    // document.getElementById("generatedFromDetails").innerText =
+    //   "Kan geen nieuwe openbare sleutel genereren zonder geldige gegevens.";
+    console.log(
+      "Kan geen nieuwe openbare sleutel genereren zonder geldige gegevens."
+    );
     return null;
   }
 }
@@ -106,5 +110,29 @@ function parseDetails(details) {
     return [matches[1], matches[2]];
   } else {
     return [null, null];
+  }
+}
+async function changingSignuture() {
+  const email = document.getElementById("email").value;
+  const sign1 = document.getElementById("sign1").value;
+  const sign2 = document.getElementById("sign2").value;
+
+  const response = await fetch("http://localhost:4000/newerLogin2", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, sign1, sign2 }), // Stuur sign1 en sign2 afzonderlijk
+  });
+
+  const data = await response.json();
+
+  if (data.success) {
+    // await changingSignuture();
+    const token = data.token;
+    localStorage.setItem("token", token);
+    window.location.href = "/dashboard.html";
+  } else {
+    alert("Inloggen mislukt. Controleer je gegevens.");
   }
 }
