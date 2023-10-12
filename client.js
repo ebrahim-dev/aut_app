@@ -1,3 +1,5 @@
+// In dit script verwerk je de clientzijde van je applicatie.
+
 // Functie om een e-mailadres op te halen uit het invoerveld
 function getEmail() {
   return document.getElementById("email").value.trim();

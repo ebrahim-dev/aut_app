@@ -33,17 +33,20 @@ function saveDatabase() {
 }
 
 app.post("/registerUser", (req, res) => {
-  const { getEmail, newerPublicKey, ondertekening, sign1, sign2 } = req.body;
+  const { gettingEmail, newerPublicKey, ondertekening, sign1, sign2 } =
+    req.body;
 
-  if (getEmail && newerPublicKey) {
+  if (gettingEmail && newerPublicKey) {
     // Controleer of de gebruiker al in de database staat
-    const existingUser = newDatabase.find((user) => user.email === getEmail);
+    const existingUser = newDatabase.find(
+      (user) => user.email === gettingEmail
+    );
 
     if (existingUser) {
       res.json({ success: false, message: "Je bent al geregistreerd" });
       return;
     }
-    let email = getEmail;
+    let email = gettingEmail;
     let newPublicKey = newerPublicKey;
     let signing1 = sign1;
     let signing2 = sign2;
@@ -173,7 +176,7 @@ app.post("/newerLogin2", async (req, res) => {
 
     const newOndertekening = await generateChallenge(sign1, sign2);
     // hier heb ik een probleem tegen gekomen, soms door het crypten bevat user.signing1 een letter minder of meer dan sign1 daarom heb ik includes gebruikt i.p.v ===
-    if (user.signing1.includes(sign1) || sign1.includes(user.signing1)) {
+    if (user.signing1.includes(sign1) || user.signing2.includes(sign2)) {
       await printIt(newOndertekening);
 
       user.ondertekening = newOndertekening;

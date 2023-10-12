@@ -14,19 +14,18 @@
     <button onclick="generate()">Generate Public Key</button>
     <p id="generatedPublicKey"></p>
 
-    <h2>Retrieve Details from Public Key</h2>
+    <h2>Retrieve Details from Challenge</h2>
     <input id="publicKey" type="text" placeholder="Ondertekening" /><br />
     <button onclick="retrieve()">Retrieve Details</button>
     <p id="retrievedDetails"></p>
     <p id="regeneratedPublicKey"></p>
 
     <h2>Generate from Details</h2>
-    <button onclick="generateFromDetails()">Generate from Details</button>
     <p id="generatedFromDetails"></p>
 
-    <h2>Show Details from Generated Public Key</h2>
+    <h2>Show Details from challenge</h2>
     <button onclick="showDetailsFromGenerated()">
-      Show Details from Generated Public Key
+      Show Details from challenge
     </button>
     <button onclick="clering()">Clearing data</button>
     <p id="processedResult"></p>
@@ -54,29 +53,6 @@
       function clering() {
         localStorage.clear();
       }
-      async function generatePublicKey(email, privateKey) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(`${email}-${privateKey}`);
-        const buffer = await crypto.subtle.digest("SHA-256", data);
-        return Array.from(new Uint8Array(buffer))
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join("");
-      }
-
-      async function retrieveDetailsFromPublicKey(publicKey) {
-        const signal1 = hexToString(publicKey.slice(0, 10));
-        const signal2 = hexToString(publicKey.slice(10));
-        return [signal1, signal2];
-      }
-
-      function hexToString(hex) {
-        let str = "";
-        for (let i = 0; i < hex.length; i += 2) {
-          const charCode = parseInt(hex.substr(i, 2), 16);
-          str += String.fromCharCode(charCode);
-        }
-        return str;
-      }
 
       async function generate() {
         const email = document.getElementById("email").value;
@@ -94,6 +70,14 @@
         // Automatically trigger the retrieve function
         retrieve();
       }
+      async function generatePublicKey(email, privateKey) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(`${email}-${privateKey}`);
+        const buffer = await crypto.subtle.digest("SHA-256", data);
+        return Array.from(new Uint8Array(buffer))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
 
       async function retrieve() {
         const publicKey = document.getElementById("publicKey").value;
@@ -108,7 +92,7 @@
             document.getElementById("sign2").value = signal2;
 
             document.getElementById("retrievedDetails").innerText = resultText;
-            generateFromDetails();
+            generateFromDetails(signal1, signal2);
           } else {
             document.getElementById("retrievedDetails").innerText =
               "Geen details gevonden voor deze Public Key";
@@ -119,33 +103,51 @@
         }
       }
 
-      async function generateFromDetails() {
-        const retrievedDetails =
-          document.getElementById("retrievedDetails").innerText;
-        const [signal1, signal2] = parseDetails(retrievedDetails);
+      async function retrieveDetailsFromPublicKey(publicKey) {
+        const signal1 = hexToString(publicKey.slice(0, 10));
+        const signal2 = hexToString(publicKey.slice(10));
+        return [signal1, signal2];
+      }
 
-        if (signal1 && signal2) {
-          const newPublicKey = await generatePublicKey(signal1, signal2);
+      function hexToString(hex) {
+        let str = "";
+        for (let i = 0; i < hex.length; i += 2) {
+          const charCode = parseInt(hex.substr(i, 2), 16);
+          str += String.fromCharCode(charCode);
+        }
+        return str;
+      }
+
+      async function generateFromDetails(key1, key2) {
+        // const retrievedDetails =
+        //   document.getElementById("retrievedDetails").innerText;
+        // const [signal1, signal2] = parseDetails(retrievedDetails);
+
+        if (key1 && key2) {
+          const newPublicKey = await generatePublicKey(key1, key2);
           document.getElementById("newerPublicKey").value = newPublicKey;
           document.getElementById(
             "generatedFromDetails"
           ).innerText = `Generated Public Key from Details: ${newPublicKey}`;
-          const sign1 = signal1;
-          const sign2 = signal2;
+          const sign1 = key1;
+          const sign2 = key2;
           const email = document.getElementById("email").value;
           const privateKey = document.getElementById("privateKey").value;
-          console.log(email);
-
           return { email, privateKey, newPublicKey, sign1, sign2 };
         } else {
           document.getElementById("generatedFromDetails").innerText =
-            "Kan geen nieuwe openbare sleutel genereren zonder geldige gegevens.";
+            "Kan geen nieuwe publicKey genereren zonder geldige gegevens.";
           return null;
         }
       }
 
       async function showDetailsFromGenerated() {
-        const processedResult = await generateFromDetails();
+        const retrievedDetails =
+          document.getElementById("retrievedDetails").innerText;
+        const [signal1, signal2] = parseDetails(retrievedDetails);
+        key1 = signal1;
+        key2 = signal2;
+        const processedResult = await generateFromDetails(key1, key2);
 
         if (processedResult) {
           const { email, privateKey, newPublicKey, sign1, sign2 } =
@@ -181,7 +183,12 @@
         }
       }
       async function showingDetailsFromGenerated() {
-        const processedResult = await generateFromDetails();
+        const retrievedDetails =
+          document.getElementById("retrievedDetails").innerText;
+        const [signal1, signal2] = parseDetails(retrievedDetails);
+        key1 = signal1;
+        key2 = signal2;
+        const processedResult = await generateFromDetails(key1, key2);
 
         if (processedResult) {
           const { email, privateKey, newPublicKey, sign1, sign2 } =
@@ -233,7 +240,7 @@
         .getElementById("registrationForm")
         .addEventListener("submit", function (event) {
           event.preventDefault();
-          var getEmail = document.getElementById("getEmail").value;
+          var gettingEmail = document.getElementById("getEmail").value;
           var newerPublicKey = document.getElementById("newerPublicKey").value;
           var ondertekening = document.getElementById("onderTekening").value;
           var sign1 = document.getElementById("sign1").value;
@@ -246,7 +253,7 @@
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              getEmail,
+              gettingEmail,
               newerPublicKey,
               ondertekening,
               sign1,
