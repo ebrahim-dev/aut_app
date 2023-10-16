@@ -1,0 +1,15 @@
+import { RequestHandler } from "express";
+import expressSession from "express-session";
+
+declare module "express" {
+  interface Request {
+    session: expressSession.Session &
+      Partial<expressSession.SessionData> & { currentChallenge?: string };
+  }
+}
+
+declare function customSession(
+  options?: expressSession.SessionOptions | undefined
+): RequestHandler;
+
+export default customSession; // Changed this line
