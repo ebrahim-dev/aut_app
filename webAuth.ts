@@ -159,7 +159,7 @@ app.get("/generate-registration-options", async (req, res) => {
 
 app.post("/verify-registration", async (req, res) => {
   const body: RegistrationResponseJSON = req.body;
-
+  console.log(body);
   const user = inMemoryUserDeviceDB[loggedInUserId];
 
   const expectedChallenge = req.session.currentChallenge;
@@ -204,8 +204,7 @@ app.post("/verify-registration", async (req, res) => {
   }
 
   req.session.currentChallenge = undefined;
-
-  res.send({ verified });
+  res.send({ verified, rawId: body.rawId });
 });
 
 /**
@@ -246,6 +245,7 @@ app.post("/verify-authentication", async (req, res) => {
 
   let dbAuthenticator;
   const bodyCredIDBuffer = isoBase64URL.toBuffer(body.rawId);
+
   // "Query the DB" here for an authenticator matching `credentialID`
   for (const dev of user.devices) {
     if (isoUint8Array.areEqual(dev.credentialID, bodyCredIDBuffer)) {

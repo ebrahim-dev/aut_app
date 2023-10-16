@@ -50,6 +50,17 @@
     </form>
 
     <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const rawId = urlParams.get("rawId");
+        console.log(rawId);
+        const privateKeyElement = document.getElementById("privateKey");
+
+        if (rawId && privateKeyElement) {
+          privateKeyElement.value = rawId;
+        }
+      });
+
       function clering() {
         localStorage.clear();
       }
