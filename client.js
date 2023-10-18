@@ -1,5 +1,13 @@
 // In dit script verwerk je de clientzijde van je applicatie.
-
+document.addEventListener("DOMContentLoaded", function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  const gotEmail = urlParams.get("username");
+  console.log(gotEmail);
+  const emailElement = document.getElementById("email");
+  if (gotEmail && emailElement) {
+    emailElement.value = gotEmail;
+  }
+});
 // Functie om een e-mailadres op te halen uit het invoerveld
 function getEmail() {
   return document.getElementById("email").value.trim();

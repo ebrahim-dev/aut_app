@@ -53,11 +53,14 @@
       document.addEventListener("DOMContentLoaded", function () {
         const urlParams = new URLSearchParams(window.location.search);
         const rawId = urlParams.get("rawId");
-        console.log(rawId);
+        const gotEmail = urlParams.get("username");
         const privateKeyElement = document.getElementById("privateKey");
-
+        const emailElement = document.getElementById("email");
         if (rawId && privateKeyElement) {
           privateKeyElement.value = rawId;
+        }
+        if (gotEmail && emailElement) {
+          emailElement.value = gotEmail;
         }
       });
 

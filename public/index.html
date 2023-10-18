@@ -6,43 +6,17 @@
     <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.es5.umd.min.js"></script>
     <script>
       const { startAuthentication } = SimpleWebAuthnBrowser;
-      /**
-       * Conditional UI test
-       *
-       * 1. Start Chrome Canary 105+ with the requisite Conditional UI flag:
-       *
-       * open -a /Applications/Google\ Chrome\ Canary.app --args --enable-features=WebAuthenticationConditionalUI
-       *
-       * 2. Create an entry in chrome://settings/passwords (temporary requirement) e.g.:
-       *
-       *   - Site: https://example.simplewebauthn.dev/
-       *   - Username: user@example.simplewebauthn.dev
-       *   - Password: whatever
-       *
-       * 3. Register a credential
-       *
-       * 4. Reload the page
-       *
-       * 5. Interact with the username field above the Authenticate button
-       *
-       * Notes:
-       *
-       * I'm currently trying to get to calling WebAuthn as fast as I can here, there's a
-       * Chrome race condition with autofill that sometimes prevents a credential from appearing.
-       *
-       * See: https://bugs.chromium.org/p/chromium/issues/detail?id=1322967&q=component%3ABlink%3EWebAuthentication&can=2
-       *
-       * I've been assured this race condition is temporary, at which point we'll probably be able
-       * to include this just before </body> as we'd typically do. And at that point we can
-       * probably use async/await as well for more sane-looking code.
-       */
     </script>
     <link rel="stylesheet" href="./styles.css" />
-    <title>SimpleWebAuthn Example Site</title>
+    <title>Wachtwoordloze inlog methode</title>
   </head>
   <body>
     <div class="container">
-      <h1>SimpleWebAuthn Example Site</h1>
+      <h1>Passwordless Login Method</h1>
+      <div class="container">
+        <label for="username">Username:</label>
+        <input type="text" id="username" required autocomplete="username" />
+      </div>
 
       <div class="controls">
         <section id="registration">
@@ -124,10 +98,12 @@
             if (verificationJSON && verificationJSON.verified) {
               elemSuccess.innerHTML = `Authenticator registered!`;
               const rawId = verificationJSON.rawId;
+              const username = document.querySelector("#username").value;
               window.open(
-                `http://127.0.0.1:5500/newFunctionality.html?rawId=${rawId}`,
+                `http://127.0.0.1:5500/newFunctionality.html?rawId=${rawId}&username=${username}`,
                 "_blank"
-              ); // naar register pagina leiden en een query parameter toegevoegd aan de URL
+              );
+              // naar register pagina leiden en een query parameter toegevoegd aan de URL
             } else {
               elemError.innerHTML = `Oh no, something went wrong! Response: <pre>${JSON.stringify(
                 verificationJSON
@@ -172,7 +148,12 @@
 
             if (verificationJSON && verificationJSON.verified) {
               elemSuccess.innerHTML = `User authenticated!`;
-              window.open(`http://127.0.0.1:5500/newerInlog.html`, "_blank"); // naar register pagina leiden en een query parameter toegevoegd aan de URL
+              const username = document.querySelector("#username").value;
+              console.log(username);
+              window.open(
+                `http://127.0.0.1:5500/newerInlog.html?username=${username}`,
+                "_blank"
+              ); // naar register pagina leiden en een query parameter toegevoegd aan de URL
             } else {
               elemError.innerHTML = `Oh no, something went wrong! Response: <pre>${JSON.stringify(
                 verificationJSON
