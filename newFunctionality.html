@@ -259,6 +259,7 @@
           var ondertekening = document.getElementById("onderTekening").value;
           var sign1 = document.getElementById("sign1").value;
           var sign2 = document.getElementById("sign2").value;
+          var sign3 = document.getElementById("privateKey").value;
 
           // Stuur de gegevens naar de server
           fetch("http://localhost:4000/registerUser", {
@@ -272,6 +273,7 @@
               ondertekening,
               sign1,
               sign2,
+              sign3,
             }),
           })
             .then((response) => response.json())

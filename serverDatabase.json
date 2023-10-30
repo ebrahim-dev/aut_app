@@ -10,56 +10,29 @@
   },
   {
     "email": "111@gmail.com",
-    "newPublicKey": "1e9ef806ec91a15eeeb1457ac9c39cee6e2afa1ac4d8ff80b4dec5f3235dce43",
-    "ondertekening": "b3e9142d9416901296d92ca36923fb024bfefb449ce376d74787a2d43ac2a99f",
-    "signing1": "³é\u0014-",
-    "signing2": "\u0016\u0012Ù,£i#û\u0002KþûDãv×G¢Ô:Â©",
-    "signing3": "½W£¹Á",
-    "signing4": "À]9å}\\\fv5ºgTPºv/qÿçä\u0014*DZ"
+    "newPublicKey": "c21a52e2308766964cded80416c0bce558e18901c1d8ae08168f0f9ba93e8190",
+    "ondertekening": "88d58ef1d3c7efb3c147d3820b68b57b5f4dfa5299625cce3b1d45edfee9b484",
+    "signing1": "ÕñÓ",
+    "signing2": "Çï³ÁGÓ\u000bhµ{_MúRb\\Î;\u001dEíþé´"
   },
   {
     "email": "222@gmail.com",
-    "newPublicKey": "d954482ba546fb6b430a04c72e01d86200e33b75bcbafb15080775b6dbff3428",
-    "ondertekening": "b7a711900155000fae5a8fd1813b9197fc914207e33951a13c0c7d5e8fe0f730",
-    "signing1": "·§\u0011\u0001",
-    "signing2": "U\u0000\u000f®ZÑ;üB\u0007ã9Q¡<\f}^à÷0",
-    "signing3": "â/:F÷",
-    "signing4": "\u001f¯o5ë\u001az:ç¿\u001b;öæ\\7Ê}\u000bpñ:çÕÓ"
+    "newPublicKey": "d9cfe2faea0cbbf38bc6ee929a35c6d03b72df1cef84018c04398c5cb6871ca1",
+    "ondertekening": "4bda7592c9a0af8667c7a2e50caaf6a0f4a8fa9116a979374eb0d0e511ddb36b",
+    "signing1": "KÚuÉ",
+    "signing2": " ¯gÇ¢å\fªö ô¨ú\u0016©y7N°Ðå\u0011Ý³k",
+    "signing5": "XDhXz0t8Au1vkd6eMVjVelxnNdkEJF-hFzhPk7eDY10",
+    "extraPublickey": "dfbf1b3a4ccbe54aa06460ae9da0ce9ab58df44e9ab8a14acdc4ea35e5d64c37",
+    "signing3": ",ò\u0017w",
+    "signing4": "sµU]ûxüiêÖ\u0000&cÏÝ]e×<QM§U"
   },
   {
     "email": "333@gmail.com",
-    "newPublicKey": "9c6901130c91fd1ae9858a36f8dc947e26b10dc0400cee7ed556a510f1765683",
-    "ondertekening": "f497147bf2aba558a99b2a565ffdbffd0332e99cec0ba9979666370438b17994",
-    "signing1": "ô\u0014{ò",
-    "signing2": "«¥X©*V_ý¿ý\u00032éì\u000b©f7\u00048±y",
-    "signing3": "ßÅø",
-    "signing4": "Äáàw{\u000e]IÍ\f¨ÿZÿ\u00028¶t\fW6òé\u001d"
-  },
-  {
-    "email": "555@gmail.com",
-    "newPublicKey": "256aa63efbf7a2229f626fa1f4ab7e453f5c9746eeee20a4f004c96a7f623d66",
-    "ondertekening": "256aa63efbf7a2229f626fa1f4ab7e453f5c9746eeee20a4f004c96a7f623d66",
-    "signing1": "%j¦>û",
-    "signing2": "÷¢\"bo¡ô«~E?\\Fîî ¤ð\u0004Éjb=f",
-    "signing3": "ú&kg",
-    "signing4": "r,û3ì½ow\u0010W\u0005íÐÛó©¥\u0017.%É0\\\u001f@"
-  },
-  {
-    "email": "444@gmail.com",
-    "newPublicKey": "96e1dc816a0cd060806f444f38cc7368991960ccef23efac7b4741b768cb5b58",
-    "ondertekening": "ef1d59471add86bc1e123a842c25a2ac633d30839d7b8edc7b36d4f1f0fb2ed1",
-    "signing1": "ï\u001dYG\u001a",
-    "signing2": "Ý¼\u001e\u0012:,%¢¬c=0{Ü{6Ôñðû.Ñ",
-    "signing3": "n¸ý}Ò",
-    "signing4": "#Û=Múk¡\u0000C½!ði4<É\u0016D« Ò\u0011¡æ"
-  },
-  {
-    "email": "666@gmail.com",
-    "newPublicKey": "13a0b62f25c81dc7a68cd6143f21a2b1d47d46ed8e87fefd314db78662a57a1b",
-    "ondertekening": "13a0b62f25c81dc7a68cd6143f21a2b1d47d46ed8e87fefd314db78662a57a1b",
-    "signing1": "\u0013 ¶/%",
-    "signing2": "È\u001dÇ¦Ö\u0014?!¢±Ô}Fíþý1M·b¥z\u001b",
-    "signing3": "SÔõpH",
-    "signing4": "\u0010B_£±û?TäsØ²(Ü/X\u0010HôîYÎ´"
+    "newPublicKey": "553f6f8e072b7aa6b9d326cf06277b5b347f46d59b5c8fee8b14d885c44e975a",
+    "ondertekening": "7aac868d688069460687fabd651eac7093a43f38a02cc318dbcb1296ef671e9a",
+    "signing1": "z¬h",
+    "signing2": "iF\u0006ú½e\u001e¬p¤?8 ,Ã\u0018ÛË\u0012ïg\u001e",
+    "signing5": "_zYi9P5ji9tgQHtMcTEIVfWDK8xD6ryiBCNjQcsk4kE",
+    "extraPublickey": "3eb65f0479099bc7774f6353b1a794be83931950befd9a1ba7c9239a12d1e886"
   }
 ]

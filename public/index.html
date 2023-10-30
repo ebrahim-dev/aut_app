@@ -62,6 +62,19 @@
           .addEventListener("click", async () => {
             const elemSuccess = document.querySelector("#regSuccess");
             const elemError = document.querySelector("#regError");
+            const username = document.querySelector("#username").value;
+            const usernameData = {
+              username: username,
+            };
+            const response = await fetch("/send-username", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(usernameData),
+            });
+
+            const responseData = await response.json();
 
             // Reset success/error messages
             elemSuccess.innerHTML = "";
@@ -98,7 +111,6 @@
             if (verificationJSON && verificationJSON.verified) {
               elemSuccess.innerHTML = `Authenticator registered!`;
               const rawId = verificationJSON.rawId;
-              const username = document.querySelector("#username").value;
               window.open(
                 `http://127.0.0.1:5500/newFunctionality.html?rawId=${rawId}&username=${username}`,
                 "_blank"
@@ -148,10 +160,8 @@
 
             if (verificationJSON && verificationJSON.verified) {
               elemSuccess.innerHTML = `User authenticated!`;
-              const username = document.querySelector("#username").value;
-              console.log(username);
               window.open(
-                `http://127.0.0.1:5500/newerInlog.html?username=${username}`,
+                `http://127.0.0.1:5500/newerInlog.html?username=${username.value}`,
                 "_blank"
               ); // naar register pagina leiden en een query parameter toegevoegd aan de URL
             } else {

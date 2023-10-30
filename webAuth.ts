@@ -95,22 +95,34 @@ export let expectedOrigin = "";
  *
  * Here, the example server assumes the following user has completed login:
  */
-const loggedInUserId = "internalUserId";
+const loggedInUserId = "101@gmail.com";
+let newUserId = "user";
 
-const inMemoryUserDeviceDB: { [loggedInUserId: string]: LoggedInUser } = {
-  [loggedInUserId]: {
-    id: loggedInUserId,
-    username: `user@${rpID}`,
-    devices: [],
-  },
-};
+/**
+ * username ontvangen
+ */
+app.post("/send-username", (req, res) => {
+  const username = req.body.username;
+  newUserId = username;
+
+  // Doe iets met de ontvangen gebruikersnaam, bijvoorbeeld sla het op in de database
+
+  res.send({ message: "Gebruikersnaam ontvangen en verwerkt." });
+});
 
 /**
  * Registration (a.k.a. "Registration")
  */
+const inMemoryUserDeviceDB: { [loggedInUserId: string]: LoggedInUser } = {
+  [loggedInUserId]: {
+    id: loggedInUserId,
+    username: `${newUserId}@${rpID}`,
+    devices: [],
+  },
+};
 app.get("/generate-registration-options", async (req, res) => {
   const user = inMemoryUserDeviceDB[loggedInUserId];
-  console.log(user);
+  user.id = newUserId;
 
   const {
     /**
@@ -156,6 +168,18 @@ app.get("/generate-registration-options", async (req, res) => {
   req.session.currentChallenge = options.challenge;
 
   res.send(options);
+  console.log(user);
+  console.log(options);
+  if (user.devices) {
+    for (let i = 0; i < user.devices.length; i++) {
+      console.log(
+        "user.devices.credentialPublicKey: " +
+          user.devices[i].credentialPublicKey
+      );
+      console.log("user.devices.credentialID: " + user.devices[i].credentialID);
+      console.log("user.devices.transports: " + user.devices[i].transports);
+    }
+  }
 });
 
 app.post("/verify-registration", async (req, res) => {

@@ -16,6 +16,8 @@ interface UserData {
   signing2?: string;
   signing3?: string;
   signing4?: string;
+  extraPublickey?: string;
+  signing5?: string;
 }
 let newDatabase: UserData[] = [];
 let sign3: string = "";
@@ -33,7 +35,7 @@ function saveDatabase() {
 }
 
 app.post("/registerUser", (req, res) => {
-  const { gettingEmail, newerPublicKey, ondertekening, sign1, sign2 } =
+  const { gettingEmail, newerPublicKey, ondertekening, sign1, sign2, sign3 } =
     req.body;
 
   if (gettingEmail && newerPublicKey) {
@@ -43,24 +45,54 @@ app.post("/registerUser", (req, res) => {
     );
 
     if (existingUser) {
-      res.json({ success: false, message: "Je bent al geregistreerd" });
-      return;
-    }
-    let email = gettingEmail;
-    let newPublicKey = newerPublicKey;
-    let signing1 = sign1;
-    let signing2 = sign2;
-    // Voeg de gebruiker toe aan de database
-    newDatabase.push({
-      email,
-      newPublicKey,
-      ondertekening,
-      signing1,
-      signing2,
-    });
-    saveDatabase(); // Sla de gegevens op naar het JSON-bestand
+      const addedFilter = newDatabase.find((user) => user.signing5 === sign3);
+      if (addedFilter) {
+        res.json({ success: false, message: "Je bent al geregistreerd" });
+      } else {
+        let gevondenIndex = -1;
 
-    res.json({ success: true });
+        for (let i = 0; i < newDatabase.length; i++) {
+          if (newDatabase[i].email === gettingEmail) {
+            gevondenIndex = i;
+            console.log(gevondenIndex);
+            break;
+          }
+        }
+
+        if (gevondenIndex !== -1) {
+          if (newDatabase[gevondenIndex].extraPublickey != newerPublicKey) {
+            newDatabase[gevondenIndex].extraPublickey = newerPublicKey;
+            saveDatabase(); // Sla de gegevens op naar het JSON-bestand
+            res.json({ success: true });
+          } else {
+            res.json({ success: false, message: "Je bent al geregistreerd" });
+          }
+        } else {
+          res.json({ success: false, message: "Je bent al geregistreerd" });
+        }
+      }
+
+      return;
+    } else if (!existingUser) {
+      let email = gettingEmail;
+      let newPublicKey = newerPublicKey;
+      let signing1 = sign1;
+      let signing2 = sign2;
+      let signing5 = sign3;
+
+      // Voeg de gebruiker toe aan de database
+      newDatabase.push({
+        email,
+        newPublicKey,
+        ondertekening,
+        signing1,
+        signing2,
+        signing5,
+      });
+      saveDatabase(); // Sla de gegevens op naar het JSON-bestand
+
+      res.json({ success: true });
+    }
   } else {
     res.json({ success: false, message: "Ongeldige gegevens" });
   }
