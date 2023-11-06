@@ -30,11 +30,13 @@ if (fs.existsSync("serverDatabase.json")) {
 }
 
 function saveDatabase() {
-  const dataToSave = JSON.stringify(newDatabase, null, 2);
+  const dataToSave = JSON.stringify(newDatabase, null, 2); // make it easier readable
   fs.writeFileSync("serverDatabase.json", dataToSave, "utf-8");
 }
 
+// gettin register information and deal it
 app.post("/registerUser", (req, res) => {
+  // getting info and setting it as a req.body
   const { gettingEmail, newerPublicKey, ondertekening, sign1, sign2, sign3 } =
     req.body;
 
@@ -54,7 +56,6 @@ app.post("/registerUser", (req, res) => {
         for (let i = 0; i < newDatabase.length; i++) {
           if (newDatabase[i].email === gettingEmail) {
             gevondenIndex = i;
-            console.log(gevondenIndex);
             break;
           }
         }

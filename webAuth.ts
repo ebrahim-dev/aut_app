@@ -168,18 +168,18 @@ app.get("/generate-registration-options", async (req, res) => {
   req.session.currentChallenge = options.challenge;
 
   res.send(options);
-  console.log(user);
-  console.log(options);
-  if (user.devices) {
-    for (let i = 0; i < user.devices.length; i++) {
-      console.log(
-        "user.devices.credentialPublicKey: " +
-          user.devices[i].credentialPublicKey
-      );
-      console.log("user.devices.credentialID: " + user.devices[i].credentialID);
-      console.log("user.devices.transports: " + user.devices[i].transports);
-    }
-  }
+  console.log("user: " + user);
+  console.log("options: " + options);
+  // if (user.devices) {
+  //   for (let i = 0; i < user.devices.length; i++) {
+  //     console.log(
+  //       "user.devices.credentialPublicKey: " +
+  //         user.devices[i].credentialPublicKey
+  //     );
+  //     console.log("user.devices.credentialID: " + user.devices[i].credentialID);
+  //     console.log("user.devices.transports: " + user.devices[i].transports);
+  //   }
+  // }
 });
 
 app.post("/verify-registration", async (req, res) => {
@@ -208,6 +208,7 @@ app.post("/verify-registration", async (req, res) => {
 
   if (verified && registrationInfo) {
     const { credentialPublicKey, credentialID, counter } = registrationInfo;
+    console.log("registrationInfo: " + registrationInfo);
 
     const existingDevice = user.devices.find((device) =>
       isoUint8Array.areEqual(device.credentialID, credentialID)
@@ -224,6 +225,7 @@ app.post("/verify-registration", async (req, res) => {
         transports: body.response.transports,
       };
       user.devices.push(newDevice);
+      console.log(user.devices);
     }
   }
 
