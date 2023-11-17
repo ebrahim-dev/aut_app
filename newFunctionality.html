@@ -279,8 +279,8 @@
             .then((response) => response.json())
             .then((data) => {
               if (data.success) {
-                showingDetailsFromGenerated();
-                showDetailsFromGenerated();
+                showingDetailsFromGenerated(); // data in de paginazelf tonen
+                showDetailsFromGenerated(); // Haal bestaande gegevens op (als die er zijn)
                 alert("Registratie succesvol!");
               } else {
                 alert("Registratie mislukt: " + data.message);

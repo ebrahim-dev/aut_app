@@ -130,7 +130,7 @@ app.post("/savedData", (req, res) => {
 app.post("/newerLogin", async (req, res) => {
   const { email } = req.body;
   let database = JSON.parse(fs.readFileSync("serverDatabase.json", "utf8"));
-
+  // controleer als de email stond al in de database
   const user = database.find((entry: { email: any }) => entry.email === email);
 
   if (user) {
@@ -195,7 +195,7 @@ async function printIt(opdracht: any) {
     sign4 = signal4;
   }
 }
-app.post("/newerLogin2", async (req, res) => {
+app.post("/changingSignature", async (req, res) => {
   try {
     const database = JSON.parse(fs.readFileSync("serverDatabase.json", "utf8"));
     const { email, sign1, sign2 } = req.body;
