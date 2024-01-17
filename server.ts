@@ -16,7 +16,7 @@ interface UserData {
   signing2?: string;
   signing3?: string;
   signing4?: string;
-  extraPublickey?: string;
+  extraPublickeys?: string[];
   signing5?: string;
 }
 let newDatabase: UserData[] = [];
@@ -61,8 +61,15 @@ app.post("/registerUser", (req, res) => {
         }
 
         if (gevondenIndex !== -1) {
-          if (newDatabase[gevondenIndex].extraPublickey != newerPublicKey) {
-            newDatabase[gevondenIndex].extraPublickey = newerPublicKey;
+          if (
+            !newDatabase[gevondenIndex].extraPublickeys ||
+            !newDatabase[gevondenIndex].extraPublickeys?.includes(
+              newerPublicKey
+            )
+          ) {
+            newDatabase[gevondenIndex].extraPublickeys =
+              newDatabase[gevondenIndex].extraPublickeys || [];
+            newDatabase[gevondenIndex].extraPublickeys?.push(newerPublicKey);
             saveDatabase(); // Sla de gegevens op naar het JSON-bestand
             res.json({ success: true });
           } else {
